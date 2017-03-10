@@ -9,20 +9,23 @@
 
 #load data
 
-if (file.exists(file.path(data.dir, "NEU_meanln_sdln.csv"))) {
-  x_conc_NEU <- read.table(file = file.path(data.dir, "NEU_meanln_sdln.csv"), 
+file <- file.path(data.dir, "NEU_meanln_sdln.csv")
+if (file.exists(file)) {
+  x_conc_NEU <- read.table(file = file, 
                            sep = ";", dec = ".", stringsAsFactors=FALSE, 
                            header = TRUE)
 } else stop("File with annual mean concentrations of rainwater
             (NEU_meanln_sdln.csv) not found in data.dir")
 
-if (file.exists(file.path(data.dir, "Vol_rain.csv"))) {
-  vol_rain <- read.csv2(file=file.path(data.dir, "Vol_rain.csv"), 
+file <- file.path(data.dir, "Vol_rain.csv")
+if (file.exists(file)) {
+  vol_rain <- read.csv2(file=file, 
                         stringsAsFactors=FALSE)
 } else stop("File with rain runoff (Vol_rain.csv) not found in data.dir")
 
-if (file.exists(file.path(data.dir, "Vol_sewage.csv"))) {
-  vol_sewage <- read.table(file = file.path(data.dir, "Vol_sewage.csv"), 
+file <- file.path(data.dir, "Vol_sewage.csv")
+if (file.exists(file)) {
+  vol_sewage <- read.table(file = file, 
                            sep = ";", dec = ".", stringsAsFactors=FALSE, 
                            header = TRUE)
 } else stop("File with sewage runoff (Vol_sewage.csv) not found in data.dir")

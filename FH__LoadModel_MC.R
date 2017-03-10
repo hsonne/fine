@@ -44,28 +44,31 @@ annual_load_rain <- function # calculates the load for each substance
 ) 
 {
   #load data
-  
-  if (file.exists(file.path(data.dir, "NEU_meanln_sdln.csv"))) {
-    x_conc_NEU <- read.table(file = file.path(data.dir, "NEU_meanln_sdln.csv"), 
+  file <- file.path(data.dir, "NEU_meanln_sdln.csv")
+  if (file.exists(file)) {
+    x_conc_NEU <- read.table(file = file, 
                              sep = ";", dec = ".", stringsAsFactors=FALSE, 
                              header = TRUE)
   } else stop("File with annual mean concentrations of rainwater
               (NEU_meanln_sdln.csv) not found in data.dir")
   
-  if (file.exists(file.path(data.dir, "BKE_meanln_sdln.csv"))) {
-    x_conc_BKE <- read.table(file = file.path(data.dir, "BKE_meanln_sdln.csv"), 
+  file <- file.path(data.dir, "BKE_meanln_sdln.csv")
+  if (file.exists(file)) {
+    x_conc_BKE <- read.table(file = file, 
                              sep = ";", dec = ".", stringsAsFactors=FALSE, 
                              header = TRUE)
   } else stop("File with annual mean concentrations of rainwater with wrong 
               connections(BKE_meanln_sdln.csv) not found in data.dir")
   
-  if (file.exists(file.path(data.dir, "Vol_rain.csv"))) {
-    vol_rain <- read.csv2(file=file.path(data.dir, "Vol_rain.csv"), 
+  file <- file.path(data.dir, "Vol_rain.csv")
+  if (file.exists(file)) {
+    vol_rain <- read.csv2(file=file, 
                           stringsAsFactors=FALSE)
   } else stop("File with rain runoff (Vol_rain.csv) not found in data.dir")
   
-  if (file.exists(file.path(data.dir, "substance_info.csv"))) {
-    removal_rates <- read.csv2(file=file.path(data.dir, "substance_info.csv"), 
+  file <- file.path(data.dir, "substance_info.csv")
+  if (file.exists(file)) {
+    removal_rates <- read.csv2(file=file, 
                                header=TRUE, stringsAsFactors=FALSE)
   } else stop("File with removal rates at WWTP (substance_info.csv) not found 
               in data.dir")
@@ -209,22 +212,24 @@ annual_load_sewage <- function # calculates the load for each substance
   
 {
   #load data
-  
-  if (file.exists(file.path(data.dir, "NEU_meanln_sdln.csv"))) {
-    x_conc_NEU <- read.table(file = file.path(data.dir, "NEU_meanln_sdln.csv"), 
+  file <- file.path(data.dir, "NEU_meanln_sdln.csv")
+  if (file.exists(file)) {
+    x_conc_NEU <- read.table(file = file, 
                              sep = ";", dec = ".", stringsAsFactors=FALSE, 
                              header = TRUE)
   } else stop("File with annual mean concentrations of rainwater
               (NEU_meanln_sdln.csv) not found in data.dir")
   
-  if (file.exists(file.path(data.dir, "Vol_sewage.csv"))) {
-    vol_sewage <- read.table(file = file.path(data.dir, "Vol_sewage.csv"), 
+  file <- file.path(data.dir, "Vol_sewage.csv")
+  if (file.exists(file)) {
+    vol_sewage <- read.table(file = file, 
                              sep = ";", dec = ".", stringsAsFactors=FALSE, 
                              header = TRUE)
   } else stop("File with sewage runoff (Vol_sewage.csv) not found in data.dir")
   
-  if (file.exists(file.path(data.dir, "substance_info.csv"))) {
-    sub_sew_info <- read.csv2(file=file.path(data.dir, "substance_info.csv"), 
+  file <- file.path(data.dir, "substance_info.csv")
+  if (file.exists(file)) {
+    sub_sew_info <- read.csv2(file=file, 
                               header=TRUE, stringsAsFactors=FALSE)
   } else stop("File with substance information WWTP (substance_info.csv) 
               not found in data.dir")
