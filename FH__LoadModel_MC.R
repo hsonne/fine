@@ -54,18 +54,30 @@ readTableOrStop <- function(data.dir, filename, type, csv2 = FALSE)
 }
 
 # initMonteCarlo ---------------------------------------------------------------
-initMonteCarlo <- function(x, runs, seed)
+initMonteCarlo <- function(x, runs, log = TRUE, set.names = TRUE, seed = NULL)
 {
   result <- data.frame(matrix(ncol = nrow(x), nrow = runs))
   
-  colnames(result) <- x$VariableName
-  
-  set.seed(seed)
-  
-  for (i in 1:ncol(result)) {
-    result[[i]] <- rlnorm(n = runs, meanlog = x$mean[i], sdlog = x$sd[i])
+  if (set.names) {
+    colnames(result) <- x$VariableName    
   }
   
+  if (! is.null(seed)) {
+    set.seed(seed)
+  }
+  
+  for (i in 1:ncol(result)) {
+    
+    result[[i]] <- if (log) {
+      
+      rlnorm(n = runs, meanlog = x$mean[i], sdlog = x$sd[i])
+      
+    } else {
+      
+      rnorm(n = runs, mean = x$mean[i], sd = x$sd[i])
+    }
+  }
+
   result
 }
 
@@ -116,17 +128,13 @@ annual_load_rain <- function # calculates the load for each substance
   #hist(log10(MC_conc_rain_wrongcon$`Escherichia coli`), breaks = 100)
   
   # Step 2: Monte Carlo simulations to get rain volumes
-  
-  MC_vol_rain_1 <- data.frame(matrix(ncol = nrow(vol_rain), nrow = runs))
+
   vol_rain$sd <- as.numeric(vol_rain$sd)
   
-  set.seed(3)
-  for(i in 1:ncol(MC_vol_rain_1)){
-    MC_vol_rain_1[[i]] <- rnorm(runs, 
-                                vol_rain$mean[i], 
-                                vol_rain$sd[i])
-  }
-  
+  MC_vol_rain_1 <- initMonteCarlo(
+    x = vol_rain, runs = runs, log = FALSE, set.names = FALSE, seed = 3
+  )
+
   MC_vol_rain_t <- t(MC_vol_rain_1)
   MC_vol_rain_1 <- vol_rain[, 1:2]
   MC_vol_rain <- cbind(MC_vol_rain_1, MC_vol_rain_t)
@@ -161,17 +169,10 @@ annual_load_rain <- function # calculates the load for each substance
   removal_rates_red$mean <- as.numeric(removal_rates$Retention_.[indices])
   removal_rates_red$sd <- as.numeric(removal_rates$Retention_sd[indices])
   
-  MC_removal_rates <- data.frame(matrix(ncol = nrow(removal_rates_red), 
-                                        nrow = runs))
-  colnames(MC_removal_rates) <- removal_rates_red$VariableName
-  
-  set.seed(4)
-  for(i in 1:ncol(MC_removal_rates)){
-    MC_removal_rates[[i]] <- rnorm(n = runs, 
-                                   mean = removal_rates_red$mean[i], 
-                                   sd = removal_rates_red$sd[i])
-  }
-  
+  MC_removal_rates <- initMonteCarlo(
+    x = removal_rates_red, runs = runs, log = FALSE, set.names = TRUE, seed = 4
+  )
+
   # Step 3: Calculation of loads in list, WWTP
   
   load_rain_wwtp <- getloadsforWWTP(myconc_MC = MC_conc_rain,
