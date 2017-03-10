@@ -40,13 +40,15 @@ readTableOrStop <- function(file, type, csv2 = FALSE)
     if (csv2) {
       
       read.csv2(file = file, stringsAsFactors = FALSE)
-
+      
     } else {
       
       read.table(file = file, sep = ";", dec = ".", stringsAsFactors = FALSE, 
                  header = TRUE)
     }
-  } else stop("File with ", type, " not found in data.dir")
+  } else stop(sprintf(
+    "File with %s (%s) not found in data.dir", type, basename(file)
+  ))
 }
 
 # annual_load_rain -------------------------------------------------------------
@@ -63,24 +65,24 @@ annual_load_rain <- function # calculates the load for each substance
   #load data
   x_conc_NEU <- readTableOrStop(
     file = file.path(data.dir, "NEU_meanln_sdln.csv"),
-    type = "annual mean concentrations of rainwater (NEU_meanln_sdln.csv)"
+    type = "annual mean concentrations of rainwater"
   )
   
   x_conc_BKE <- readTableOrStop(
     file = file.path(data.dir, "BKE_meanln_sdln.csv"),
     type = paste("annual mean concentrations of rainwater with wrong",
-                 "connections(BKE_meanln_sdln.csv)")
+                 "connections")
   )
 
   vol_rain <- readTableOrStop(
     file = file.path(data.dir, "Vol_rain.csv"),
-    type = "rain runoff (Vol_rain.csv)",
+    type = "rain runoff",
     csv2 = TRUE
   )
   
-  removal_rates <- readTableOrStopr(
+  removal_rates <- readTableOrStop(
     file = file.path(data.dir, "substance_info.csv"),
-    type = "removal rates at WWTP (substance_info.csv)",
+    type = "removal rates at WWTP",
     csv2 = TRUE  
   )
   
@@ -224,17 +226,17 @@ annual_load_sewage <- function # calculates the load for each substance
   #load data
   x_conc_NEU <- readTableOrStop(
     file = file.path(data.dir, "NEU_meanln_sdln.csv"),
-    type = "annual mean concentrations of rainwater (NEU_meanln_sdln.csv)"
+    type = "annual mean concentrations of rainwater"
   )
   
   vol_sewage <- readTableOrStop(
     file = file.path(data.dir, "Vol_sewage.csv"),
-    type = "sewage runoff (Vol_sewage.csv)"
+    type = "sewage runoff"
   )
   
   sub_sew_info <- readTableOrStop(
     file = file.path(data.dir, "substance_info.csv"),
-    type = "substance information WWTP (substance_info.csv)", 
+    type = "substance information WWTP", 
     csv2 = TRUE
   )
   

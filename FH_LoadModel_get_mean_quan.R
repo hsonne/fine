@@ -11,18 +11,18 @@
 
 x_conc_NEU <- readTableOrStop(
   file <- file.path(data.dir, "NEU_meanln_sdln.csv"),
-  type = "annual mean concentrations of rainwater (NEU_meanln_sdln.csv)"
+  type = "annual mean concentrations of rainwater"
 )
 
 vol_rain <- readTableOrStop(
   file = file.path(data.dir, "Vol_rain.csv"),
-  type = "rain runoff (Vol_rain.csv)",
+  type = "rain runoff",
   csv2 = TRUE
 )
 
 vol_sewage <- readTableOrStop(
   file = file.path(data.dir, "Vol_sewage.csv"),
-  type = "sewage runoff (Vol_sewage.csv)"
+  type = "sewage runoff"
 )
 
 # get Names for Variables, SUWs and paths
