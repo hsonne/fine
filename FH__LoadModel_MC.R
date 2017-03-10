@@ -53,6 +53,22 @@ readTableOrStop <- function(data.dir, filename, type, csv2 = FALSE)
   ))
 }
 
+# initMonteCarlo ---------------------------------------------------------------
+initMonteCarlo <- function(x, runs, seed)
+{
+  result <- data.frame(matrix(ncol = nrow(x), nrow = runs))
+  
+  colnames(result) <- x$VariableName
+  
+  set.seed(seed)
+  
+  for (i in 1:ncol(result)) {
+    result[[i]] <- rlnorm(n = runs, meanlog = x$mean[i], sdlog = x$sd[i])
+  }
+  
+  result
+}
+
 # annual_load_rain -------------------------------------------------------------
 annual_load_rain <- function # calculates the load for each substance
 ### separates pathways (rain runoff, CSO and WWTP)
@@ -90,29 +106,11 @@ annual_load_rain <- function # calculates the load for each substance
   
   # Step 1: Monte Carlo simulations to get concentrations in rainwater with 
   # proportion of wrong connections (x)
-  ##set.seed(1) # reproducible result
   
-  MC_conc_rain <- data.frame(matrix(ncol = nrow(x_conc_NEU), nrow = runs))
-  colnames(MC_conc_rain) <- x_conc_NEU$VariableName
+  MC_conc_rain <- initMonteCarlo(x = x_conc_NEU, runs = runs, seed = 0)
   
-  set.seed(0)
-  for(i in 1:ncol(MC_conc_rain)){
-    MC_conc_rain[[i]] <- rlnorm(n = runs, 
-                                meanlog = x_conc_NEU$mean[i], 
-                                sdlog = x_conc_NEU$sd[i])
-  }
-  
-  MC_conc_rain_wrongcon <- data.frame(matrix(ncol = nrow(x_conc_BKE), 
-                                             nrow = runs))
-  colnames(MC_conc_rain_wrongcon) <- x_conc_BKE$VariableName
-  
-  set.seed(1)
-  for(i in 1:ncol(MC_conc_rain_wrongcon)){
-    MC_conc_rain_wrongcon[[i]] <- rlnorm(n = runs, 
-                                         meanlog = x_conc_BKE$mean[i], 
-                                         sdlog = x_conc_BKE$sd[i])
-  }
-  
+  MC_conc_rain_wrongcon <- initMonteCarlo(x = x_conc_BKE, runs = runs, seed = 1)
+
   MC_conc_rain_sep <- MC_conc_rain * y + x * MC_conc_rain_wrongcon
   
   #hist(log10(MC_conc_rain_wrongcon$`Escherichia coli`), breaks = 100)
