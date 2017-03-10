@@ -10,18 +10,17 @@
 #load data
 
 x_conc_NEU <- readTableOrStop(
-  file <- file.path(data.dir, "NEU_meanln_sdln.csv"),
+  data.dir, filename = "NEU_meanln_sdln.csv",
   type = "annual mean concentrations of rainwater"
 )
 
 vol_rain <- readTableOrStop(
-  file = file.path(data.dir, "Vol_rain.csv"),
-  type = "rain runoff",
-  csv2 = TRUE
+  data.dir, filename = "Vol_rain.csv",
+  type = "rain runoff", csv2 = TRUE
 )
 
 vol_sewage <- readTableOrStop(
-  file = file.path(data.dir, "Vol_sewage.csv"),
+  data.dir, filename = "Vol_sewage.csv",
   type = "sewage runoff"
 )
 
