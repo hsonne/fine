@@ -9,26 +9,21 @@
 
 #load data
 
-file <- file.path(data.dir, "NEU_meanln_sdln.csv")
-if (file.exists(file)) {
-  x_conc_NEU <- read.table(file = file, 
-                           sep = ";", dec = ".", stringsAsFactors=FALSE, 
-                           header = TRUE)
-} else stop("File with annual mean concentrations of rainwater
-            (NEU_meanln_sdln.csv) not found in data.dir")
+x_conc_NEU <- readTableOrStop(
+  file <- file.path(data.dir, "NEU_meanln_sdln.csv"),
+  type = "annual mean concentrations of rainwater (NEU_meanln_sdln.csv)"
+)
 
-file <- file.path(data.dir, "Vol_rain.csv")
-if (file.exists(file)) {
-  vol_rain <- read.csv2(file=file, 
-                        stringsAsFactors=FALSE)
-} else stop("File with rain runoff (Vol_rain.csv) not found in data.dir")
+vol_rain <- readTableOrStop(
+  file = file.path(data.dir, "Vol_rain.csv"),
+  type = "rain runoff (Vol_rain.csv)",
+  csv2 = TRUE
+)
 
-file <- file.path(data.dir, "Vol_sewage.csv")
-if (file.exists(file)) {
-  vol_sewage <- read.table(file = file, 
-                           sep = ";", dec = ".", stringsAsFactors=FALSE, 
-                           header = TRUE)
-} else stop("File with sewage runoff (Vol_sewage.csv) not found in data.dir")
+vol_sewage <- readTableOrStop(
+  file = file.path(data.dir, "Vol_sewage.csv"),
+  type = "sewage runoff (Vol_sewage.csv)"
+)
 
 # get Names for Variables, SUWs and paths
 
