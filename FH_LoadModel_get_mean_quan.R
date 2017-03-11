@@ -19,7 +19,7 @@ filename <- "NEU_meanln_sdln"
 x_conc_NEU <- readTableOrStop(data.dir, filename, types[filename])
 
 filename <- "Vol_rain"
-vol_rain <- readTableOrStop(data.dir, filename, types[filename], csv2 = TRUE)
+vol_rain <- readTableOrStop(data.dir, filename, types[filename], dec = ",")
 
 filename <- "Vol_sewage"
 vol_sewage <- readTableOrStop(data.dir, filename, types[filename])

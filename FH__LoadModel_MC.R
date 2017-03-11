@@ -67,11 +67,10 @@ annual_load_rain <- function # calculates the load for each substance
   x_conc_BKE <- readTableOrStop(data.dir, filename, types[filename])
 
   filename <- "Vol_rain"
-  vol_rain <- readTableOrStop(data.dir, filename, types[filename], csv2 = TRUE)
+  vol_rain <- readTableOrStop(data.dir, filename, types[filename], dec = ",")
   
   filename <- "substance_info"
-  removal_rates <- readTableOrStop(data.dir, filename, types[filename], 
-                                   csv2 = TRUE)
+  removal_rates <- readTableOrStop(data.dir, filename, types[filename], dec = ",")
   
   ### loads of rainwater based substances via separate sewer system and CSO
   
@@ -183,21 +182,24 @@ annual_load_rain <- function # calculates the load for each substance
 }
 
 # readTableOrStop --------------------------------------------------------------
-readTableOrStop <- function(data.dir, filename, type, csv2 = FALSE)
+readTableOrStop <- function
+(
+  data.dir, filename, type, 
+  ...
+  ### additional arguments passed to read.table and eventually overriding our
+  ### default settings
+)
 {
   file <- file.path(data.dir, paste0(filename, ".csv"))
   
   if (file.exists(file)) {
     
-    if (csv2) {
-      
-      read.csv2(file = file, stringsAsFactors = FALSE)
-      
-    } else {
-      
-      read.table(file = file, sep = ";", dec = ".", stringsAsFactors = FALSE, 
-                 header = TRUE)
-    }
+    # Set default arguments
+    args <- list(sep = ";", dec = ".", stringsAsFactors = FALSE, header = TRUE)
+    
+    # Call read.table with the default arguments but eventually overriden by
+    # additional arguments given in "...". callWith() is from "kwb.utils"
+    callWith(read.table, args, file = file, ...)
     
   } else {
     
@@ -382,8 +384,7 @@ annual_load_sewage <- function # calculates the load for each substance
   vol_sewage <- readTableOrStop(data.dir, filename, types[filename])
   
   filename <- "substance_info"
-  sub_sew_info <- readTableOrStop(data.dir, filename, types[filename], 
-                                  csv2 = TRUE)
+  sub_sew_info <- readTableOrStop(data.dir, filename, types[filename], dec = ",")
   
   ### loads of sewage based substances via CSO and WWTP
   
