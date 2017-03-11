@@ -7,22 +7,22 @@
 
 ## SOURCE ;)
 
-#load data
-
-x_conc_NEU <- readTableOrStop(
-  data.dir, filename = "NEU_meanln_sdln.csv",
-  type = "annual mean concentrations of rainwater"
+# Define file types
+types <- c(
+  NEU_meanln_sdln.csv = "annual mean concentrations of rainwater",
+  Vol_rain.csv = "rain runoff",
+  Vol_sewage.csv = "sewage runoff"
 )
 
-vol_rain <- readTableOrStop(
-  data.dir, filename = "Vol_rain.csv",
-  type = "rain runoff", csv2 = TRUE
-)
+# load data
+filename <- "NEU_meanln_sdln.csv"
+x_conc_NEU <- readTableOrStop(data.dir, filename, types[filename])
 
-vol_sewage <- readTableOrStop(
-  data.dir, filename = "Vol_sewage.csv",
-  type = "sewage runoff"
-)
+filename <- "Vol_rain.csv"
+vol_rain <- readTableOrStop(data.dir, filename, types[filename], csv2 = TRUE)
+
+filename <- "Vol_sewage.csv"
+vol_sewage <- readTableOrStop(data.dir, filename, types[filename])
 
 # get Names for Variables, SUWs and paths
 
