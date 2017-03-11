@@ -54,12 +54,13 @@ readTableOrStop <- function(data.dir, filename, type, csv2 = FALSE)
 }
 
 # initMonteCarlo ---------------------------------------------------------------
-initMonteCarlo <- function(x, runs, log = TRUE, set.names = TRUE, seed = NULL)
+initMonteCarlo <- function(x, runs, log = TRUE, set.names = TRUE, 
+                           column.mean = "mean", column.sd = "sd", seed = NULL)
 {
   result <- data.frame(matrix(ncol = nrow(x), nrow = runs))
   
   if (set.names) {
-    colnames(result) <- x$VariableName    
+    colnames(result) <- x$VariableName
   }
   
   if (! is.null(seed)) {
@@ -70,11 +71,11 @@ initMonteCarlo <- function(x, runs, log = TRUE, set.names = TRUE, seed = NULL)
     
     result[[i]] <- if (log) {
       
-      rlnorm(n = runs, meanlog = x$mean[i], sdlog = x$sd[i])
+      rlnorm(n = runs, meanlog = x[i, column.mean], sdlog = x[i, column.sd])
       
     } else {
       
-      rnorm(n = runs, mean = x$mean[i], sd = x$sd[i])
+      rnorm(n = runs, mean = x[i, column.mean], sd = x[i, column.sd])
     }
   }
   
@@ -250,15 +251,10 @@ annual_load_sewage <- function # calculates the load for each substance
   
   # Step 1: Monte Carlo Simulations to get sewage volume
   
-  MC_vol_sew <- data.frame(matrix(ncol = nrow(vol_sewage), nrow = runs))
-  
-  set.seed(2)
-  for (i in 1:ncol(MC_vol_sew)) {
-    MC_vol_sew[[i]] <- rnorm(runs, 
-                             vol_sewage$mean[i], 
-                             vol_sewage$sd[i])
-  }
-  
+  MC_vol_sew <- initMonteCarlo(
+    x = vol_sewage, runs = runs, log = FALSE, set.names = FALSE, seed = 2
+  )
+
   MC_vol_sew_t <- t(MC_vol_sew)
   MC_vol_sew <- vol_sewage[, 1:2]
   MC_vol_sewage <- cbind(MC_vol_sew, MC_vol_sew_t)
@@ -281,38 +277,22 @@ annual_load_sewage <- function # calculates the load for each substance
   sub_sew_info$Retention_sd[indices2] <- 0
   
   # MC to get retention
-  MC_retention <- data.frame(matrix(ncol = nrow(sub_sew_info), nrow = runs))
-  colnames(MC_retention) <- sub_sew_info$VariableName
-  
-  set.seed(6)
-  for (i in 1:ncol(MC_retention)) {
-    MC_retention[[i]] <- rnorm(n = runs, 
-                               mean = sub_sew_info$Retention_.[i], 
-                               sd = sub_sew_info$Retention_sd[i])
-  }
-  
+  MC_retention <- initMonteCarlo(
+    x = sub_sew_info, runs = runs, log = FALSE, set.names = TRUE,
+    column.mean = "Retention_.", column.sd = "Retention_sd", seed = 6
+  )
+
   # MC to get concentrations in wastewater
-  MC_conc_sew <- data.frame(matrix(ncol = nrow(sub_sew_info), nrow = runs))
-  colnames(MC_conc_sew) <- sub_sew_info$VariableName
-  
-  set.seed(7)
-  for (i in 1:ncol(MC_conc_sew)) {
-    
-    MC_conc_sew[[i]] <- rlnorm(n = runs,
-                               meanlog = sub_sew_info$CinWWTP_calculated[i],
-                               sdlog = sub_sew_info$CinWWTP_sd[i]) 
-  }
+  MC_conc_sew <- initMonteCarlo(
+    x = sub_sew_info, runs = runs, log = TRUE, set.names = TRUE, 
+    column.mean = "CinWWTP_calculated", column.sd = "CinWWTP_sd", seed = 7
+  )
   
   # MC to get effluent concentrations - WWTP
-  MC_Cout_WWTP <- data.frame(matrix(ncol = nrow(sub_sew_info), nrow = runs))
-  colnames(MC_Cout_WWTP) <- sub_sew_info$VariableName
-  
-  set.seed(8)
-  for (i in 1:ncol(MC_Cout_WWTP)){
-    MC_Cout_WWTP[[i]] <- rlnorm(n = runs,
-                                meanlog = sub_sew_info$CoutWWTP[i],
-                                sdlog = sub_sew_info$CoutWWTP_sd[i])
-  }
+  MC_Cout_WWTP <- initMonteCarlo(
+    x = sub_sew_info, runs = runs, log = TRUE, set.names = TRUE, 
+    column.mean = "CoutWWTP", column.sd = "CoutWWTP_sd", seed = 8
+  )
   
   # Step 3: Calculation of loads in list, CSO + WWTP
   
