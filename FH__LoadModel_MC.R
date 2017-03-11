@@ -67,16 +67,10 @@ initMonteCarlo <- function(x, runs, log = TRUE, set.names = TRUE,
     set.seed(seed)
   }
   
+  FUN <- if (log) rlnorm else rnorm
+  
   for (i in seq_len(ncol(result))) {
-    
-    result[[i]] <- if (log) {
-      
-      rlnorm(n = runs, meanlog = x[i, column.mean], sdlog = x[i, column.sd])
-      
-    } else {
-      
-      rnorm(n = runs, mean = x[i, column.mean], sd = x[i, column.sd])
-    }
+    result[[i]] <- FUN(runs, x[i, column.mean], x[i, column.sd])
   }
   
   result
