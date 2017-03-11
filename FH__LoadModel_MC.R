@@ -175,11 +175,12 @@ annual_load_rain <- function # calculates the load for each substance
   # missing removal rates (mean and sd) are set = 0
   removal_rates <- toNumeric(removal_rates, c("Retention_.", "Retention_sd"))
 
-  removal_rates[which(is.na(removal_rates$Retention_.)), 2] <- 0
-  removal_rates[which(is.na(removal_rates$Retention_sd)), 3] <- 0
+  removal_rates[is.na(removal_rates$Retention_.), 2] <- 0
+  removal_rates[is.na(removal_rates$Retention_sd), 3] <- 0
   
   # get removal rates for substances in x_conc_NEU only (and in same order)
   removal_rates_red <- x_conc_NEU[, 1:2]
+  
   indices <- match(removal_rates_red$VariableName, removal_rates$VariableName)
   
   removal_rates_red$mean <- as.numeric(removal_rates$Retention_.[indices])
@@ -280,10 +281,8 @@ annual_load_sewage <- function # calculates the load for each substance
   sub_sew_info <- toNumeric(sub_sew_info, columns)
 
   # set retention to zero, where information is lacking
-  indices <- which(is.na(sub_sew_info$Retention_.))
-  sub_sew_info$Retention_.[indices] <- 0
-  indices2 <- which(is.na(sub_sew_info$Retention_sd))
-  sub_sew_info$Retention_sd[indices2] <- 0
+  sub_sew_info$Retention_.[is.na(sub_sew_info$Retention_.)] <- 0
+  sub_sew_info$Retention_sd[is.na(sub_sew_info$Retention_sd)] <- 0
   
   # MC to get retention
   MC_retention <- initMonteCarlo(
@@ -420,6 +419,7 @@ getloadsforCSOorSEP <- function
       
       indices <- which(myvol_MC$SUW == SUW_Names[f])
       vol_x_SUW <- myvol_MC[indices, ]
+      
       load_x[[e]][[1 + f]] <- NA
       
       for(run in seq_len(runs)) {
@@ -475,6 +475,7 @@ getloadsforWWTP <- function
       
       indices <- which(myvol_MC$SUW == SUW_Names[f])
       vol_x_SUW <- myvol_MC[indices, ]
+      
       load_x[[e]][[1 + f]] <- NA
       
       for (run in seq_len(runs)) {
