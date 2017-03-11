@@ -53,55 +53,34 @@ if (FALSE)
   # Provide suwNames
 
   # CSO
-  load_rain_cso_mean_quan <- MeanQuantilesforloads(
-    loads = load_rain_cso,
-    suwNames = SUW_Names_rain,
-    variables = variables
-  )
-  
+  args <- list(load_rain_cso, SUW_Names_rain, variables)
+  load_rain_cso_mean_quan <- do.call(MeanQuantilesforloads, args)
+
   # SEP
-  load_rain_sep_mean_quan <- MeanQuantilesforloads(
-    loads = load_rain_sep,
-    suwNames = SUW_Names_rain,
-    variables = variables
-  )
+  args <- list(load_rain_sep, SUW_Names_rain, variables)
+  load_rain_sep_mean_quan <- do.call(MeanQuantilesforloads, args)
 
   # WWTP
-  load_rain_wwtp_mean_quan <- MeanQuantilesforloads(
-    loads = load_rain_wwtp,
-    suwNames = SUW_Names_rain,
-    variables = variables
-  )
-  
+  args <- list(load_rain_wwtp, SUW_Names_rain, variables)
+  load_rain_wwtp_mean_quan <- do.call(MeanQuantilesforloads, args)
+
   ## get mean and quantiles for load_rain_sum_path
-  load_rain_sum_path_mean_quan <- MeanQuantilesforloadscomb(
-    loads = load_rain_sum_path,
-    suwNames = SUW_Names_rain,
-    variables = variables
-  )
+  args <- list(load_rain_sum_path, SUW_Names_rain, variables)
+  load_rain_sum_path_mean_quan <- do.call(MeanQuantilesforloadscomb, args)
   
   ## get mean and quantiles for loads in sewage and all pathways----------------
   
   # CSO
-  load_sew_cso_mean_quan <- MeanQuantilesforloads(
-    loads = load_sew_cso,
-    suwNames = SUW_Names_sew,
-    variables = variables
-  )
+  args <- list(load_sew_cso, SUW_Names_sew, variables)
+  load_sew_cso_mean_quan <- do.call(MeanQuantilesforloads, args)
   
   # WWTP
-  load_sew_wwtp_mean_quan <- MeanQuantilesforloads(
-    loads = load_sew_wwtp, 
-    suwNames = SUW_Names_sew,
-    variables = variables
-  )
+  args <- list(load_sew_wwtp, SUW_Names_sew, variables)
+  load_sew_wwtp_mean_quan <- do.call(MeanQuantilesforloads, args)
   
   ## get mean and quantiles for load_sew_sum_path
-  load_sew_sum_path_mean_quan <- MeanQuantilesforloadscomb(
-    loads = load_sew_sum_path,
-    suwNames = SUW_Names_sew,
-    variables = variables
-  )
+  args <- list(load_sew_sum_path, SUW_Names_sew, variables)
+  load_sew_sum_path_mean_quan <- do.call(MeanQuantilesforloadscomb, args)
   
   ## combine loads rainwater and sewage
   load_cso_comb <- combineLoads(
@@ -111,11 +90,8 @@ if (FALSE)
   )
 
   # get mean and quantiles for load_cso
-  load_cso_mean_quan <- MeanQuantilesforloads(
-    loads = load_cso_comb,
-    suwNames = SUW_Names_rain,
-    variables = variables
-  )
+  args <- list(load_cso_comb, SUW_Names_rain, variables)
+  load_cso_mean_quan <- do.call(MeanQuantilesforloads, args)
   
   # load_rain_wwtp + load_sew_wwtp
   load_wwtp_comb <- combineLoads(
@@ -125,11 +101,8 @@ if (FALSE)
   )
 
   # get mean and quantiles for load_wwtp
-  load_wwtp_mean_quan <- MeanQuantilesforloads(
-    loads = load_wwtp_comb,
-    suwNames = SUW_Names_rain,
-    variables = variables
-  )
+  args <- list(load_wwtp_comb, SUW_Names_rain, variables)
+  load_wwtp_mean_quan <- do.call(MeanQuantilesforloads, args)
   
   # total load in rainwater + sewage
   load_TOT <- combineLoads(
@@ -139,11 +112,8 @@ if (FALSE)
   )
 
   # get mean and quantiles for total load
-  load_TOT_mean_quan <- MeanQuantilesforloadscomb(
-    loads = load_TOT,
-    suwNames = SUW_Names_rain,
-    variables = variables
-  )
+  args <- list(load_TOT, SUW_Names_rain, variables)
+  load_TOT_mean_quan <- do.call(MeanQuantilesforloadscomb, args)
   
   ### get mean and quantiles for volumes of rainwater and sewage
   ## rainwater volumes
