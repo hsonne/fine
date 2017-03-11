@@ -51,14 +51,14 @@ if (FALSE)
   # Define function arguments for meanQuantiles
   args1 <- list(
     
-    rain_cso  = list(load_rain_cso,      offset = 1, SUW_Names_rain, variables),
-    rain_sep  = list(load_rain_sep,      offset = 1, SUW_Names_rain, variables),
-    rain_wwtp = list(load_rain_wwtp,     offset = 1, SUW_Names_rain, variables),
-    rain_sum  = list(load_rain_sum_path, offset = 0, SUW_Names_rain, variables),
+    rain_cso  = list(offset = 1, SUW_Names_rain, variables, load_rain_cso),
+    rain_sep  = list(offset = 1, SUW_Names_rain, variables, load_rain_sep),
+    rain_wwtp = list(offset = 1, SUW_Names_rain, variables, load_rain_wwtp),
+    rain_sum  = list(offset = 0, SUW_Names_rain, variables, load_rain_sum_path),
     
-    sew_cso  = list(load_sew_cso,      offset = 1, SUW_Names_sew, variables),
-    sew_wwtp = list(load_sew_wwtp,     offset = 1, SUW_Names_sew, variables),
-    sew_sum  = list(load_sew_sum_path, offset = 0, SUW_Names_sew, variables)
+    sew_cso  = list(offset = 1, SUW_Names_sew, variables, load_sew_cso),
+    sew_wwtp = list(offset = 1, SUW_Names_sew, variables, load_sew_wwtp),
+    sew_sum  = list(offset = 0, SUW_Names_sew, variables, load_sew_sum_path)
   )
   
   ## get mean and quantiles for loads in rainwater and all pathways
@@ -77,9 +77,9 @@ if (FALSE)
   # Define function arguments for combineLoads
   args2 <- list(
     
-    cso  = list(load_rain_cso,      load_sew_cso,      variables),
-    wwtp = list(load_rain_wwtp,     load_sew_wwtp,     variables),
-    tot  = list(load_rain_sum_path, load_sew_sum_path, variables)
+    cso  = list(variables, load_rain_cso, load_sew_cso),
+    wwtp = list(variables, load_rain_wwtp, load_sew_wwtp),
+    tot  = list(variables, load_rain_sum_path, load_sew_sum_path)
   )
   
   ## combine loads rainwater and sewage, load_rain_wwtp + load_sew_wwtp,
@@ -92,9 +92,9 @@ if (FALSE)
   # available)
   args3 <- list(
     
-    cso  = list(load_cso_comb,  offset = 1, SUW_Names_rain, variables),
-    wwtp = list(load_wwtp_comb, offset = 1, SUW_Names_rain, variables),
-    tot  = list(load_TOT,       offset = 0, SUW_Names_rain, variables)
+    cso  = list(offset = 1, SUW_Names_rain, variables, load_cso_comb),
+    wwtp = list(offset = 1, SUW_Names_rain, variables, load_wwtp_comb),
+    tot  = list(offset = 0, SUW_Names_rain, variables, load_TOT)
   )
   
   # get mean and quantiles for load_cso, load_wwtp
@@ -355,7 +355,7 @@ if (FALSE)
 ### FUNCTIONS ###
 
 # combineLoads -----------------------------------------------------------------
-combineLoads <- function(x, y, variables)
+combineLoads <- function(variables, x, y)
 {
   result <- lapply(seq_along(variables), function(i) {
     
@@ -375,7 +375,7 @@ combineLoads <- function(x, y, variables)
 
 # meanQuantiles ----------------------------------------------------------------
 # loads: loads in rainwater or sewage
-meanQuantiles <- function(loads, offset, suwNames, variables)
+meanQuantiles <- function(offset, suwNames, variables, loads)
 {
   mylist <- list()
   
