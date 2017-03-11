@@ -393,30 +393,22 @@ annual_load_sewage <- function # calculates the load for each substance
 }
 
 # changeunit--------------------------------------------------------------------
-changeunit <- function(x)
+changeunit <- function(x, factors = CONVERSION_FACTORS)
 {
   #x <- load_x
 
-  conversionFactors <- c(
-    "mg/L" = 1 / 1000,
-    "MPN/100 mL" = 10000,
-    "PFU/100 mL" = 10000
-  )
-  
-  unit <- unique(x[, "unit"])
+  unit <- unique(selectColumns(x, "unit"))
 
-  conversionFactor <- conversionFactors[unit]
-
-  if (is.na(conversionFactor)) {
+  if (is.na(factors[unit])) {
     
     stop("No conversion factor defined for unit: '", unit, "'! Conversion ", 
-         "factors are defined for: ", stringList(names(conversionFactors)))
+         "factors are defined for: ", stringList(names(factors)))
   }
   
   # apply conversion of values to all columns except for "unit"
   columns <- setdiff(names(x), "unit")
 
-  x[, columns] <- x[, columns] * conversionFactor
+  x[, columns] <- x[, columns] * factors[unit]
   
   x
 }
