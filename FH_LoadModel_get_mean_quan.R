@@ -79,18 +79,12 @@ if (FALSE)
   
   ## combine loads rainwater and sewage
   
-  # load_rain_cso + load_sew_cso
-  
-  load_cso_comb <- lapply(seq_along(VariableNames), function(i) {
-      x <- load_rain_cso[[i]]
-      y <- load_sew_cso[[i]]
-      for (column in SUW_Names_sew) {
-        x[, column] <- x[, column] + y[, column]
-      }
-      x
-  })
-  names(load_cso_comb) <- VariableNames
-  
+  load_cso_comb <- combineLoads(
+    x = load_rain_cso, 
+    y = load_sew_cso, 
+    VariableNames = VariableNames
+  )
+
   # get mean and quantiles for load_cso
   
   load_cso_mean_quan <- MeanQuantilesforloads(
@@ -98,16 +92,12 @@ if (FALSE)
   
   # load_rain_wwtp + load_sew_wwtp
   
-  load_wwtp_comb <- lapply(seq_along(VariableNames), function(i) {
-    x <- load_rain_wwtp[[i]]
-    y <- load_sew_wwtp[[i]]
-    for (column in SUW_Names_sew) {
-      x[, column] <- x[, column] + y[, column]
-    }
-    x
-  })
-  names(load_wwtp_comb) <- VariableNames
-    
+  load_wwtp_comb <- combineLoads(
+    x = load_rain_wwtp, 
+    y = load_sew_wwtp, 
+    VariableNames = VariableNames
+  )
+
   # get mean and quantiles for load_wwtp
   
   load_wwtp_mean_quan <- MeanQuantilesforloads(
@@ -115,16 +105,12 @@ if (FALSE)
   
   # total load in rainwater + sewage
   
-  load_TOT <- lapply(seq_along(VariableNames), function(i) {
-    x <- load_rain_sum_path[[i]]
-    y <- load_sew_sum_path[[i]]
-    for (column in SUW_Names_sew) {
-      x[, column] <- x[, column] + y[, column]
-    }
-    x
-  })
-  names(load_TOT) <- VariableNames
-  
+  load_TOT <- combineLoads(
+    x = load_rain_sum_path, 
+    y = load_sew_sum_path, 
+    VariableNames = VariableNames
+  )
+
   # get mean and quantiles for total load
   
   load_TOT_mean_quan <- MeanQuantilesforloadscomb(
@@ -379,6 +365,25 @@ if (FALSE)
 }
 
 ### FUNCTIONS ###
+
+# combineLoads -----------------------------------------------------------------
+combineLoads <- function(x, y, VariableNames)
+{
+  result <- lapply(seq_along(VariableNames), function(i) {
+    
+    xi <- x[[i]]
+    yi <- y[[i]]
+    
+    for (column in SUW_Names_sew) {
+      xi[, column] <- xi[, column] + yi[, column]
+    }
+    
+    xi
+  })
+  
+  # name the list elements and return
+  structure(result, names = VariableNames)
+}
 
 # meanQuantiles ----------------------------------------------------------------
 # loads: loads in rainwater or sewage
