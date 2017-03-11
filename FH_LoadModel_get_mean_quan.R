@@ -50,32 +50,34 @@ if (FALSE)
   
   ## get mean and quantiles for loads in rainwater and all pathways-------------
   
+  # Provide suwNames
+
   # CSO
   load_rain_cso_mean_quan <- MeanQuantilesforloads(
     loads = load_rain_cso,
     variables = variables,
-    suwNames = unique(selectColumns(vol_rain, "SUW"))
+    suwNames = SUW_Names_rain
   )
   
   # SEP
   load_rain_sep_mean_quan <- MeanQuantilesforloads(
     loads = load_rain_sep,
     variables = variables,
-    suwNames = unique(selectColumns(vol_rain, "SUW"))
+    suwNames = SUW_Names_rain
   )
   
   # WWTP
   load_rain_wwtp_mean_quan <- MeanQuantilesforloads(
     loads = load_rain_wwtp,
     variables = variables,
-    suwNames = unique(selectColumns(vol_rain, "SUW"))
+    suwNames = SUW_Names_rain
   )
   
   ## get mean and quantiles for load_rain_sum_path
   load_rain_sum_path_mean_quan <- MeanQuantilesforloadscomb(
     loads = load_rain_sum_path,
     variables = variables,
-    suwNames = unique(selectColumns(vol_rain, "SUW"))
+    suwNames = SUW_Names_rain
   )
   
   ## get mean and quantiles for loads in sewage and all pathways----------------
@@ -84,21 +86,21 @@ if (FALSE)
   load_sew_cso_mean_quan <- MeanQuantilesforloads(
     loads = load_sew_cso,
     variables = variables,
-    suwNames = unique(selectColumns(vol_sewage, "SUW"))
+    suwNames = SUW_Names_sew
   )
   
   # WWTP
   load_sew_wwtp_mean_quan <- MeanQuantilesforloads(
     loads = load_sew_wwtp, 
     variables = variables,
-    suwNames = unique(selectColumns(vol_sewage, "SUW"))
+    suwNames = SUW_Names_sew
   )
   
   ## get mean and quantiles for load_sew_sum_path
   load_sew_sum_path_mean_quan <- MeanQuantilesforloadscomb(
     loads = load_sew_sum_path,
     variables = variables,
-    suwNames = unique(selectColumns(vol_sewage, "SUW"))
+    suwNames = SUW_Names_sew
   )
   
   ## combine loads rainwater and sewage
@@ -112,7 +114,7 @@ if (FALSE)
   load_cso_mean_quan <- MeanQuantilesforloads(
     loads = load_cso_comb,
     variables = variables,
-    suwNames = unique(selectColumns(vol_rain, "SUW"))
+    suwNames = SUW_Names_rain
   )
   
   # load_rain_wwtp + load_sew_wwtp
@@ -126,7 +128,7 @@ if (FALSE)
   load_wwtp_mean_quan <- MeanQuantilesforloads(
     loads = load_wwtp_comb,
     variables = variables,
-    suwNames = unique(selectColumns(vol_rain, "SUW"))
+    suwNames = SUW_Names_rain
   )
   
   # total load in rainwater + sewage
@@ -140,7 +142,7 @@ if (FALSE)
   load_TOT_mean_quan <- MeanQuantilesforloadscomb(
     loads = load_TOT,
     variables = variables,
-    suwNames = unique(selectColumns(vol_rain, "SUW"))
+    suwNames = SUW_Names_rain
   )
   
   ### get mean and quantiles for volumes of rainwater and sewage
