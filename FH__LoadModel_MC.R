@@ -39,6 +39,148 @@ if (FALSE)
 
 ### FUNCTIONS ###
 
+# annual_load_rain -------------------------------------------------------------
+annual_load_rain <- function # calculates the load for each substance
+### separates pathways (rain runoff, CSO and WWTP)
+(
+  data.dir
+  ### path of model data (annual mean concentrations "NEU_meanln_sdln.csv",
+  #### mean concentrations with wrong connections "BKE_meanln_sdln.csv"
+  ### rain runoff volumes "Vol_rain.csv, 
+  ### removal at WWTP "substance_info.csv")
+) 
+{
+  # load data
+  x_conc_NEU <- readTableOrStop(
+    data.dir, filename = "NEU_meanln_sdln.csv", 
+    type = "annual mean concentrations of rainwater"
+  )
+  
+  x_conc_BKE <- readTableOrStop(
+    data.dir, filename = "BKE_meanln_sdln.csv",
+    type = paste("annual mean concentrations of rainwater with wrong",
+                 "connections")
+  )
+  
+  vol_rain <- readTableOrStop(
+    data.dir, filename = "Vol_rain.csv", 
+    type = "rain runoff", csv2 = TRUE
+  )
+  
+  removal_rates <- readTableOrStop(
+    data.dir, filename = "substance_info.csv", 
+    type = "removal rates at WWTP", csv2 = TRUE  
+  )
+  
+  ### loads of rainwater based substances via separate sewer system and CSO
+  
+  # Step 1: Monte Carlo simulations to get concentrations in rainwater with 
+  # proportion of wrong connections (x)
+  
+  MC_conc_rain <- initMonteCarlo(x = x_conc_NEU, runs = runs, seed = 0)
+  
+  MC_conc_rain_wrongcon <- initMonteCarlo(x = x_conc_BKE, runs = runs, seed = 1)
+  
+  MC_conc_rain_sep <- MC_conc_rain * y + x * MC_conc_rain_wrongcon
+  
+  #hist(log10(MC_conc_rain_wrongcon$`Escherichia coli`), breaks = 100)
+  
+  # Step 2: Monte Carlo simulations to get rain volumes
+  
+  vol_rain <- toNumeric(vol_rain, "sd")
+  
+  MC_vol_rain_1 <- initMonteCarlo(
+    x = vol_rain, runs = runs, log = FALSE, set.names = FALSE, seed = 3
+  )
+  
+  MC_vol_rain_t <- t(MC_vol_rain_1)
+  MC_vol_rain_1 <- vol_rain[, 1:2]
+  MC_vol_rain <- cbind(MC_vol_rain_1, MC_vol_rain_t)
+  
+  # Step 3: Calculation of loads in list, sep + CSO
+  
+  load_rain_sep <- getLoads(
+    concentration = MC_conc_rain_sep,
+    units = x_conc_NEU$UnitsAbbreviation, 
+    volume = MC_vol_rain,
+    parameter = "ROWvol, Trennsystem [m3/a]"
+  )
+  
+  load_rain_cso <- getLoads(
+    concentration = MC_conc_rain,
+    units = x_conc_NEU$UnitsAbbreviation,
+    volume = MC_vol_rain,
+    parameter = "ROWvol, CSO [m3/a]"
+  )
+  
+  ### loads of rainwater based substances via WWTP
+  
+  # Step 1: MC to get concentration in rainwater and rain volume calculation is 
+  #   already done (MC_conc_rain, MC_vol_rain)
+  
+  # Step 2: Monte Carlo simulations to get removal rates
+  
+  # missing removal rates (mean and sd) are set = 0
+  removal_rates <- toNumeric(removal_rates, c("Retention_.", "Retention_sd"))
+  
+  removal_rates[is.na(removal_rates$Retention_.), 2] <- 0
+  removal_rates[is.na(removal_rates$Retention_sd), 3] <- 0
+  
+  # get removal rates for substances in x_conc_NEU only (and in same order)
+  removal_rates_red <- x_conc_NEU[, 1:2]
+  
+  indices <- match(removal_rates_red$VariableName, removal_rates$VariableName)
+  
+  removal_rates_red$mean <- as.numeric(removal_rates$Retention_.[indices])
+  removal_rates_red$sd <- as.numeric(removal_rates$Retention_sd[indices])
+  
+  MC_removal_rates <- initMonteCarlo(
+    x = removal_rates_red, runs = runs, log = FALSE, set.names = TRUE, seed = 4
+  )
+  
+  # Step 3: Calculation of loads in list, WWTP
+  
+  load_rain_wwtp <- getLoads(
+    concentration = MC_conc_rain,
+    units = x_conc_NEU$UnitsAbbreviation,
+    volume = MC_vol_rain,
+    parameter = "ROWvol, WWTP [m3/a]",
+    removal = MC_removal_rates
+  )
+  
+  # sum paths (in list)
+  
+  load_rain_sum_paths <- list()
+  VariableNames <- x_conc_NEU$VariableName
+  SUW_Names_rain <- unique(vol_rain$SUW)
+  
+  for (i in seq_along(VariableNames)) {
+    
+    load_rain_sum_paths[[i]] <- data.frame(matrix(
+      ncol = length(SUW_Names_rain), 
+      nrow = runs
+    ))
+    
+    colnames(load_rain_sum_paths[[i]]) <- SUW_Names_rain
+    names(load_rain_sum_paths)[i] <- colnames(MC_conc_rain)[i]
+    
+    for (j in seq_along(SUW_Names_rain)) {
+      
+      load_rain_sum_paths[[i]][j] <- load_rain_cso[[i]][1 + j] + 
+        load_rain_sep[[i]][1 + j] + load_rain_wwtp[[i]][1 + j]
+    }
+  }
+  
+  # output
+  list(
+    load_rain_sep = load_rain_sep, 
+    load_rain_cso = load_rain_cso, 
+    load_rain_wwtp = load_rain_wwtp, 
+    load_rain_sum_paths = load_rain_sum_paths,
+    MC_vol_rain = MC_vol_rain
+  )
+}
+
 # readTableOrStop --------------------------------------------------------------
 readTableOrStop <- function(data.dir, filename, type, csv2 = FALSE)
 {
@@ -136,146 +278,80 @@ toNumeric <- function(x, columns)
   x
 }
 
-# annual_load_rain -------------------------------------------------------------
-annual_load_rain <- function # calculates the load for each substance
-### separates pathways (rain runoff, CSO and WWTP)
+# getLoads ---------------------------------------------------------------------
+getLoads <- function
 (
-  data.dir
-  ### path of model data (annual mean concentrations "NEU_meanln_sdln.csv",
-  #### mean concentrations with wrong connections "BKE_meanln_sdln.csv"
-  ### rain runoff volumes "Vol_rain.csv, 
-  ### removal at WWTP "substance_info.csv")
-) 
+  concentration, 
+  ### concentration of rain (for CSO) or rain with wrongcons (for sep) or sewage
+  ### (CSO)
+  units, 
+  ### abbreviated unit names
+  volume, 
+  ### rainwater or sewage volume
+  parameter,
+  removal = NULL
+)
 {
-  # load data
-  x_conc_NEU <- readTableOrStop(
-    data.dir, filename = "NEU_meanln_sdln.csv", 
-    type = "annual mean concentrations of rainwater"
-  )
+  # calculate loads in list
+  load_x <- list()
   
-  x_conc_BKE <- readTableOrStop(
-    data.dir, filename = "BKE_meanln_sdln.csv",
-    type = paste("annual mean concentrations of rainwater with wrong",
-                 "connections")
-  )
-  
-  vol_rain <- readTableOrStop(
-    data.dir, filename = "Vol_rain.csv", 
-    type = "rain runoff", csv2 = TRUE
-  )
-  
-  removal_rates <- readTableOrStop(
-    data.dir, filename = "substance_info.csv", 
-    type = "removal rates at WWTP", csv2 = TRUE  
-  )
-  
-  ### loads of rainwater based substances via separate sewer system and CSO
-  
-  # Step 1: Monte Carlo simulations to get concentrations in rainwater with 
-  # proportion of wrong connections (x)
-  
-  MC_conc_rain <- initMonteCarlo(x = x_conc_NEU, runs = runs, seed = 0)
-  
-  MC_conc_rain_wrongcon <- initMonteCarlo(x = x_conc_BKE, runs = runs, seed = 1)
-  
-  MC_conc_rain_sep <- MC_conc_rain * y + x * MC_conc_rain_wrongcon
-  
-  #hist(log10(MC_conc_rain_wrongcon$`Escherichia coli`), breaks = 100)
-  
-  # Step 2: Monte Carlo simulations to get rain volumes
-  
-  vol_rain <- toNumeric(vol_rain, "sd")
-  
-  MC_vol_rain_1 <- initMonteCarlo(
-    x = vol_rain, runs = runs, log = FALSE, set.names = FALSE, seed = 3
-  )
-  
-  MC_vol_rain_t <- t(MC_vol_rain_1)
-  MC_vol_rain_1 <- vol_rain[, 1:2]
-  MC_vol_rain <- cbind(MC_vol_rain_1, MC_vol_rain_t)
-  
-  # Step 3: Calculation of loads in list, sep + CSO
-  
-  load_rain_sep <- getLoads(
-    concentration = MC_conc_rain_sep,
-    units = x_conc_NEU$UnitsAbbreviation, 
-    volume = MC_vol_rain,
-    parameter = "ROWvol, Trennsystem [m3/a]"
-  )
-  
-  load_rain_cso <- getLoads(
-    concentration = MC_conc_rain,
-    units = x_conc_NEU$UnitsAbbreviation,
-    volume = MC_vol_rain,
-    parameter = "ROWvol, CSO [m3/a]"
-  )
-  
-  ### loads of rainwater based substances via WWTP
-  
-  # Step 1: MC to get concentration in rainwater and rain volume calculation is 
-  #   already done (MC_conc_rain, MC_vol_rain)
-  
-  # Step 2: Monte Carlo simulations to get removal rates
-  
-  # missing removal rates (mean and sd) are set = 0
-  removal_rates <- toNumeric(removal_rates, c("Retention_.", "Retention_sd"))
-
-  removal_rates[is.na(removal_rates$Retention_.), 2] <- 0
-  removal_rates[is.na(removal_rates$Retention_sd), 3] <- 0
-  
-  # get removal rates for substances in x_conc_NEU only (and in same order)
-  removal_rates_red <- x_conc_NEU[, 1:2]
-  
-  indices <- match(removal_rates_red$VariableName, removal_rates$VariableName)
-  
-  removal_rates_red$mean <- as.numeric(removal_rates$Retention_.[indices])
-  removal_rates_red$sd <- as.numeric(removal_rates$Retention_sd[indices])
-  
-  MC_removal_rates <- initMonteCarlo(
-    x = removal_rates_red, runs = runs, log = FALSE, set.names = TRUE, seed = 4
-  )
-  
-  # Step 3: Calculation of loads in list, WWTP
-  
-  load_rain_wwtp <- getLoads(
-    concentration = MC_conc_rain,
-    units = x_conc_NEU$UnitsAbbreviation,
-    volume = MC_vol_rain,
-    parameter = "ROWvol, WWTP [m3/a]",
-    removal = MC_removal_rates
-  )
-
-  # sum paths (in list)
-  
-  load_rain_sum_paths <- list()
-  VariableNames <- x_conc_NEU$VariableName
-  SUW_Names_rain <- unique(vol_rain$SUW)
-  
-  for (i in seq_along(VariableNames)) {
+  for (e in seq_len(ncol(concentration))) {
     
-    load_rain_sum_paths[[i]] <- data.frame(matrix(
-      ncol = length(SUW_Names_rain), 
-      nrow = runs
-    ))
+    load_x[[e]] <- data.frame(unit = rep(units[e], times = nrow(concentration)))
     
-    colnames(load_rain_sum_paths[[i]]) <- SUW_Names_rain
-    names(load_rain_sum_paths)[i] <- colnames(MC_conc_rain)[i]
+    names(load_x)[e] <- colnames(concentration)[e]
     
-    for (j in seq_along(SUW_Names_rain)) {
+    # get volume for each SUW
+    SUW_Names <- unique(volume$SUW)
+    
+    for (f in seq_along(SUW_Names)) {
       
-      load_rain_sum_paths[[i]][j] <- load_rain_cso[[i]][1 + j] + 
-        load_rain_sep[[i]][1 + j] + load_rain_wwtp[[i]][1 + j]
+      indices <- which(volume$SUW == SUW_Names[f])
+      vol_x_SUW <- volume[indices, ]
+      
+      load_x[[e]][[1 + f]] <- NA
+      
+      for (run in seq_len(runs)) {
+        
+        condition <- vol_x_SUW$Parameter == parameter
+        
+        load <- concentration[run, e] * vol_x_SUW[condition, 2 + run]
+        
+        if (! is.null(removal)) {
+          load <- load * (1 - removal[run, e] / 100)
+        }
+        
+        load_x[[e]][[1 + f]][run] <- load
+        
+        colnames(load_x[[e]])[1 + f] <- SUW_Names[f]
+      }
     }
+    
+    changeunit(load_x[[e]])
   }
   
-  # output
-  list(
-    load_rain_sep = load_rain_sep, 
-    load_rain_cso = load_rain_cso, 
-    load_rain_wwtp = load_rain_wwtp, 
-    load_rain_sum_paths = load_rain_sum_paths,
-    MC_vol_rain = MC_vol_rain
-  )
+  load_x
+}
+
+# changeunit--------------------------------------------------------------------
+changeunit <- function(x, factors = CONVERSION_FACTORS)
+{
+  #x <- load_x
+  
+  unit <- unique(selectColumns(x, "unit"))
+  
+  if (is.na(factors[unit])) {
+    
+    stop("No conversion factor defined for unit: '", unit, "'! Conversion ", 
+         "factors are defined for: ", stringList(names(factors)))
+  }
+  
+  # apply conversion of values to all columns except for "unit"
+  columns <- setdiff(names(x), "unit")
+  
+  x[, columns] <- x[, columns] * factors[unit]
+  
+  x
 }
 
 # annual_load_sewage ----------------------------------------------------------- 
@@ -397,80 +473,4 @@ annual_load_sewage <- function # calculates the load for each substance
     load_sew_sum_paths = load_sew_sum_paths,
     MC_vol_sewage = MC_vol_sewage
   )
-}
-
-# changeunit--------------------------------------------------------------------
-changeunit <- function(x, factors = CONVERSION_FACTORS)
-{
-  #x <- load_x
-
-  unit <- unique(selectColumns(x, "unit"))
-
-  if (is.na(factors[unit])) {
-    
-    stop("No conversion factor defined for unit: '", unit, "'! Conversion ", 
-         "factors are defined for: ", stringList(names(factors)))
-  }
-  
-  # apply conversion of values to all columns except for "unit"
-  columns <- setdiff(names(x), "unit")
-
-  x[, columns] <- x[, columns] * factors[unit]
-  
-  x
-}
-
-# getLoads ---------------------------------------------------------------------
-getLoads <- function
-(
-  concentration, 
-  ### concentration of rain (for CSO) or rain with wrongcons (for sep) or sewage
-  ### (CSO)
-  units, 
-  ### abbreviated unit names
-  volume, 
-  ### rainwater or sewage volume
-  parameter,
-  removal = NULL
-)
-{
-  # calculate loads in list
-  load_x <- list()
-  
-  for (e in seq_len(ncol(concentration))) {
-    
-    load_x[[e]] <- data.frame(unit = rep(units[e], times = nrow(concentration)))
-    
-    names(load_x)[e] <- colnames(concentration)[e]
-    
-    # get volume for each SUW
-    SUW_Names <- unique(volume$SUW)
-    
-    for (f in seq_along(SUW_Names)) {
-      
-      indices <- which(volume$SUW == SUW_Names[f])
-      vol_x_SUW <- volume[indices, ]
-      
-      load_x[[e]][[1 + f]] <- NA
-      
-      for (run in seq_len(runs)) {
-        
-        condition <- vol_x_SUW$Parameter == parameter
-  
-        load <- concentration[run, e] * vol_x_SUW[condition, 2 + run]
-        
-        if (! is.null(removal)) {
-          load <- load * (1 - removal[run, e] / 100)
-        }
-        
-        load_x[[e]][[1 + f]][run] <- load
-          
-        colnames(load_x[[e]])[1 + f] <- SUW_Names[f]
-      }
-    }
-    
-    changeunit(load_x[[e]])
-  }
-  
-  load_x
 }
