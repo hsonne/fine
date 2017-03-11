@@ -393,32 +393,32 @@ annual_load_sewage <- function # calculates the load for each substance
 }
 
 # changeunit--------------------------------------------------------------------
-changeunit <- function(mytable)
+changeunit <- function(x)
 {
-  #mytable <-   load_x
+  #x <- load_x
   
   # if unit is mg / l
-  if (unique(mytable[,"unit"]) == "mg/L") {
+  if (unique(x[,"unit"]) == "mg/L") {
     
     # apply convert value to all column except for "unit"
-    mytable[, -which(names(mytable) == "unit")] <- mytable[, -which(names(mytable) == "unit")] / 1000
+    x[, -which(names(x) == "unit")] <- x[, -which(names(x) == "unit")] / 1000
   }
   
   # if unit is MPN/100 mL
-  if (unique(mytable[,"unit"]) == "MPN/100 mL") {
+  if (unique(x[,"unit"]) == "MPN/100 mL") {
     
     # apply convert value to all column except for "unit"
-    mytable[, -which(names(mytable) == "unit")] <- mytable[, -which(names(mytable) == "unit")] * 10000
+    x[, -which(names(x) == "unit")] <- x[, -which(names(x) == "unit")] * 10000
   }
   
   # if unit is PFU/100 mL
-  if (unique(mytable[,"unit"]) == "PFU/100 mL") {
+  if (unique(x[,"unit"]) == "PFU/100 mL") {
     
     # apply convert value to all column except for "unit"
-    mytable[, -which(names(mytable) == "unit")] <- mytable[, -which(names(mytable) == "unit")] * 10000
+    x[, -which(names(x) == "unit")] <- x[, -which(names(x) == "unit")] * 10000
   }
   
-  mytable
+  x
 }
 
 # getLoads ---------------------------------------------------------------------
