@@ -15,14 +15,14 @@ types <- c(
 )
 
 # load data
-filename <- "NEU_meanln_sdln"
-x_conc_NEU <- readTableOrStop(data.dir, filename, types[filename])
+name <- "NEU_meanln_sdln"
+x_conc_NEU <- readTableOrStop(data.dir, name, types[name])
 
-filename <- "Vol_rain"
-vol_rain <- readTableOrStop(data.dir, filename, types[filename], dec = ",")
+name <- "Vol_rain"
+vol_rain <- readTableOrStop(data.dir, name, types[name], dec = ",")
 
-filename <- "Vol_sewage"
-vol_sewage <- readTableOrStop(data.dir, filename, types[filename])
+name <- "Vol_sewage"
+vol_sewage <- readTableOrStop(data.dir, name, types[name])
 
 # get Names for Variables, SUWs and paths
 

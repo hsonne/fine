@@ -60,17 +60,17 @@ annual_load_rain <- function # calculates the load for each substance
   )
   
   # load data
-  filename <- "NEU_meanln_sdln"
-  x_conc_NEU <- readTableOrStop(data.dir, filename, types[filename])
+  name <- "NEU_meanln_sdln"
+  x_conc_NEU <- readTableOrStop(data.dir, name, types[name])
 
-  filename <- "BKE_meanln_sdln"
-  x_conc_BKE <- readTableOrStop(data.dir, filename, types[filename])
+  name <- "BKE_meanln_sdln"
+  x_conc_BKE <- readTableOrStop(data.dir, name, types[name])
 
-  filename <- "Vol_rain"
-  vol_rain <- readTableOrStop(data.dir, filename, types[filename], dec = ",")
+  name <- "Vol_rain"
+  vol_rain <- readTableOrStop(data.dir, name, types[name], dec = ",")
   
-  filename <- "substance_info"
-  removal_rates <- readTableOrStop(data.dir, filename, types[filename], dec = ",")
+  name <- "substance_info"
+  removal_rates <- readTableOrStop(data.dir, name, types[name], dec = ",")
   
   ### loads of rainwater based substances via separate sewer system and CSO
   
@@ -184,14 +184,15 @@ annual_load_rain <- function # calculates the load for each substance
 # readTableOrStop --------------------------------------------------------------
 readTableOrStop <- function
 (
-  data.dir, filename, type, 
+  data.dir, name, type, 
   ...
   ### additional arguments passed to read.table and eventually overriding our
   ### default settings
 )
 {
   # Compose the full path to the file
-  file <- file.path(data.dir, paste0(filename, ".csv"))
+  filename <- paste0(name, ".csv")
+  file <- file.path(data.dir, filename)
   
   if (! file.exists(file)) {
     
@@ -377,14 +378,14 @@ annual_load_sewage <- function # calculates the load for each substance
   )
   
   # load data
-  filename <- "NEU_meanln_sdln"
-  x_conc_NEU <- readTableOrStop(data.dir, filename, types[filename])
+  name <- "NEU_meanln_sdln"
+  x_conc_NEU <- readTableOrStop(data.dir, name, types[name])
   
-  filename <- "Vol_sewage"
-  vol_sewage <- readTableOrStop(data.dir, filename, types[filename])
+  name <- "Vol_sewage"
+  vol_sewage <- readTableOrStop(data.dir, name, types[name])
   
-  filename <- "substance_info"
-  sub_sew_info <- readTableOrStop(data.dir, filename, types[filename], dec = ",")
+  name <- "substance_info"
+  sub_sew_info <- readTableOrStop(data.dir, name, types[name], dec = ",")
   
   ### loads of sewage based substances via CSO and WWTP
   
