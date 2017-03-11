@@ -96,19 +96,22 @@ annual_load_rain <- function # calculates the load for each substance
   MC_vol_rain_t <- t(MC_vol_rain_1)
   MC_vol_rain_1 <- vol_rain[, 1:2]
   MC_vol_rain <- cbind(MC_vol_rain_1, MC_vol_rain_t)
+
+  # Provide units
+  units <- selectColumns(x_conc_NEU, "UnitsAbbreviation")
   
   # Step 3: Calculation of loads in list, sep + CSO
   
   load_rain_sep <- getLoads(
     concentration = MC_conc_rain_sep,
-    units = x_conc_NEU$UnitsAbbreviation, 
+    units = units, 
     volume = MC_vol_rain,
     parameter = "ROWvol, Trennsystem [m3/a]"
   )
   
   load_rain_cso <- getLoads(
     concentration = MC_conc_rain,
-    units = x_conc_NEU$UnitsAbbreviation,
+    units = units,
     volume = MC_vol_rain,
     parameter = "ROWvol, CSO [m3/a]"
   )
@@ -142,7 +145,7 @@ annual_load_rain <- function # calculates the load for each substance
   
   load_rain_wwtp <- getLoads(
     concentration = MC_conc_rain,
-    units = x_conc_NEU$UnitsAbbreviation,
+    units = units,
     volume = MC_vol_rain,
     parameter = "ROWvol, WWTP [m3/a]",
     removal = MC_removal_rates
@@ -429,14 +432,17 @@ annual_load_sewage <- function # calculates the load for each substance
     x = sub_sew_info, runs = runs, log = TRUE, set.names = TRUE, 
     column.mean = "CoutWWTP", column.sd = "CoutWWTP_sd", seed = 8
   )
+
+  # Provide units
+  units <- selectColumns(x_conc_NEU, "UnitsAbbreviation")
   
   # Step 3: Calculation of loads in list, CSO + WWTP
-  
+
   ## CSO
 
   load_sew_cso <- getLoads(
     concentration = MC_conc_sew,
-    units = x_conc_NEU$UnitsAbbreviation, 
+    units = units, 
     volume = MC_vol_sewage, 
     parameter = "ROWvol, CSO [m3/a]"
   )
@@ -445,7 +451,7 @@ annual_load_sewage <- function # calculates the load for each substance
 
   load_sew_wwtp <- getLoads(
     concentration = MC_conc_sew, 
-    units = x_conc_NEU$UnitsAbbreviation,
+    units = units,
     volume = MC_vol_sewage,
     parameter = "ROWvol, WWTP [m3/a]",
     removal = MC_retention
