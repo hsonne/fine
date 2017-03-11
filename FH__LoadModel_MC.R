@@ -76,6 +76,44 @@ initMonteCarlo <- function(x, runs, log = TRUE, set.names = TRUE,
   result
 }
 
+# initMonteCarlo2 --------------------------------------------------------------
+initMonteCarlo2 <- function
+(
+  x, runs, log = TRUE, set.names = TRUE, column.mean = "mean", column.sd = "sd", 
+  seed = NULL
+)
+{
+  # Set the seed for the random number generator if a seed is given
+  if (! is.null(seed)) {
+    set.seed(seed)
+  }
+
+  # Set the normal distribution function to either rlnorm() or rnorm()
+  FUN.norm <- ifelse(log, rlnorm, rnorm)
+  
+  # Create a vector of row indices 1:nrow(x)
+  rows <- seq_len(nrow(x))
+  
+  # For each row index, call a function that looks up the mean and the standard
+  # deviation from the appropriate columns and calls the normal distribution
+  # function with these values. The result is a list. 
+  result <- lapply(rows, FUN = function(row) {
+    FUN.norm(n = runs, x[row, column.mean], x[row, column.sd])
+  })
+
+  # Provide a vector of (column) names
+  names <- if (set.names) {
+    as.character(x$VariableName) 
+  } else {
+    paste0("X", indices) # Default names: X1, X2, X3, ...
+  }
+  
+  # Convert the list into a data frame and set the column names of that
+  # data frame by setting its attribute "name". Use structure() to nicely set
+  # attributes "on the fly"
+  structure(as.data.frame(result), names = names)
+}
+
 # toNumeric --------------------------------------------------------------------
 toNumeric <- function(x, columns)
 {
