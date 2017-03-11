@@ -9,19 +9,19 @@
 
 # Define file types
 types <- c(
-  NEU_meanln_sdln.csv = "annual mean concentrations of rainwater",
-  Vol_rain.csv = "rain runoff",
-  Vol_sewage.csv = "sewage runoff"
+  NEU_meanln_sdln = "annual mean concentrations of rainwater",
+  Vol_rain= "rain runoff",
+  Vol_sewage = "sewage runoff"
 )
 
 # load data
-filename <- "NEU_meanln_sdln.csv"
+filename <- "NEU_meanln_sdln"
 x_conc_NEU <- readTableOrStop(data.dir, filename, types[filename])
 
-filename <- "Vol_rain.csv"
+filename <- "Vol_rain"
 vol_rain <- readTableOrStop(data.dir, filename, types[filename], csv2 = TRUE)
 
-filename <- "Vol_sewage.csv"
+filename <- "Vol_sewage"
 vol_sewage <- readTableOrStop(data.dir, filename, types[filename])
 
 # get Names for Variables, SUWs and paths

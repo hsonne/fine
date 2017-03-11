@@ -52,24 +52,24 @@ annual_load_rain <- function # calculates the load for each substance
 {
   # Define file types
   types <- c(
-    NEU_meanln_sdln.csv = "annual mean concentrations of rainwater",
-    BKE_meanln_sdln.csv = paste("annual mean concentrations of rainwater with", 
+    NEU_meanln_sdln = "annual mean concentrations of rainwater",
+    BKE_meanln_sdln = paste("annual mean concentrations of rainwater with", 
                                 "wrong connections"),
-    Vol_rain.csv        = "rain runoff",
-    substance_info.csv  = "removal rates at WWTP"
+    Vol_rain        = "rain runoff",
+    substance_info  = "removal rates at WWTP"
   )
   
   # load data
-  filename <- "NEU_meanln_sdln.csv"
+  filename <- "NEU_meanln_sdln"
   x_conc_NEU <- readTableOrStop(data.dir, filename, types[filename])
 
-  filename <- "BKE_meanln_sdln.csv"
+  filename <- "BKE_meanln_sdln"
   x_conc_BKE <- readTableOrStop(data.dir, filename, types[filename])
 
-  filename <- "Vol_rain.csv"
+  filename <- "Vol_rain"
   vol_rain <- readTableOrStop(data.dir, filename, types[filename], csv2 = TRUE)
   
-  filename <- "substance_info.csv"
+  filename <- "substance_info"
   removal_rates <- readTableOrStop(data.dir, filename, types[filename], 
                                    csv2 = TRUE)
   
@@ -185,7 +185,7 @@ annual_load_rain <- function # calculates the load for each substance
 # readTableOrStop --------------------------------------------------------------
 readTableOrStop <- function(data.dir, filename, type, csv2 = FALSE)
 {
-  file <- file.path(data.dir, filename)
+  file <- file.path(data.dir, paste0(filename, ".csv"))
   
   if (file.exists(file)) {
     
@@ -368,19 +368,19 @@ annual_load_sewage <- function # calculates the load for each substance
 {
   # Define file types
   types <- c(
-    NEU_meanln_sdln.csv = "annual mean concentrations of rainwater",
-    Vol_sewage.csv = "sewage runoff",
-    substance_info.csv = "substance information WWTP"
+    NEU_meanln_sdln = "annual mean concentrations of rainwater",
+    Vol_sewage = "sewage runoff",
+    substance_info = "substance information WWTP"
   )
   
   # load data
-  filename <- "NEU_meanln_sdln.csv"
+  filename <- "NEU_meanln_sdln"
   x_conc_NEU <- readTableOrStop(data.dir, filename, types[filename])
   
-  filename <- "Vol_sewage.csv"
+  filename <- "Vol_sewage"
   vol_sewage <- readTableOrStop(data.dir, filename, types[filename])
   
-  filename <- "substance_info.csv"
+  filename <- "substance_info"
   sub_sew_info <- readTableOrStop(data.dir, filename, types[filename], 
                                   csv2 = TRUE)
   
