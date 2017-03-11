@@ -155,7 +155,7 @@ if (FALSE)
   vol_rain_mean_quan[, 3:5] <- 0
   colnames(vol_rain_mean_quan)[3:5] <- c("mean", "Quan 5", "Quan 95")
   
-  for (i in 1:(length(SUW_Names_rain) * 3)) {
+  for (i in seq_len(3 * length(SUW_Names_rain))) {
     
     vol_rain_mean_quan[i, 3] <- mean(MC_vol_rain[, i])
     vol_rain_mean_quan[i, 4] <- quantile(MC_vol_rain[, i], probs = 0.05)
@@ -214,7 +214,7 @@ if (FALSE)
   vol_sewage_mean_quan[, 3:5] <- 0
   colnames(vol_sewage_mean_quan)[3:5] <- c("mean", "Quan 5", "Quan 95")
   
-  for (i in 1:(length(SUW_Names_sew) * 2)) {
+  for (i in seq_len(2 * length(SUW_Names_sew))) {
     
     vol_sewage_mean_quan[i, 3] <- mean(MC_vol_sewage[, i])
     vol_sewage_mean_quan[i, 4] <- quantile(MC_vol_sewage[, i], probs = 0.05)
