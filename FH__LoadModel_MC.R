@@ -399,21 +399,21 @@ changeunit <- function(x)
   unit <- unique(x[, "unit"])
 
   # apply conversion of values to all columns except for "unit"
-  index.unit <- which(names(x) == "unit")
+  columns <- setdiff(names(x), "unit")
   
   if (unit == "mg/L") {
     
-    x[, -index.unit] <- x[, -index.unit] / 1000
+    x[, columns] <- x[, columns] / 1000
     
   } else if (unit == "MPN/100 mL") {
     
     # apply convert value to all column except for "unit"
-    x[, -index.unit] <- x[, -index.unit] * 10000
+    x[, columns] <- x[, columns] * 10000
     
   } else if (unit == "PFU/100 mL") {
     
     # apply convert value to all column except for "unit"
-    x[, -index.unit] <- x[, -index.unit] * 10000
+    x[, columns] <- x[, columns] * 10000
   }
   
   x
