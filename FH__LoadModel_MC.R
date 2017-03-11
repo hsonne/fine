@@ -190,22 +190,22 @@ readTableOrStop <- function
   ### default settings
 )
 {
+  # Compose the full path to the file
   file <- file.path(data.dir, paste0(filename, ".csv"))
   
-  if (file.exists(file)) {
+  if (! file.exists(file)) {
     
-    # Set default arguments
-    args <- list(sep = ";", dec = ".", stringsAsFactors = FALSE, header = TRUE)
-    
-    # Call read.table with the default arguments but eventually overriden by
-    # additional arguments given in "...". callWith() is from "kwb.utils"
-    callWith(read.table, args, file = file, ...)
-    
-  } else {
-    
-    stop(sprintf("File with %s (%s) not found in data.dir (%s)", 
-                 type, filename, data.dir))
+    stop(sprintf(
+      "File with %s (%s) not found in data.dir (%s)", type, filename, data.dir
+    ))
   }
+  
+  # Set default arguments
+  args <- list(sep = ";", dec = ".", stringsAsFactors = FALSE, header = TRUE)
+  
+  # Call read.table with the default arguments but eventually overriden by
+  # additional arguments given in "...". callWith() is from "kwb.utils"
+  callWith(read.table, args, file = file, ...)
 }
 
 # initMonteCarlo ---------------------------------------------------------------
