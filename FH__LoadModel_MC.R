@@ -82,6 +82,16 @@ initMonteCarlo <- function(x, runs, log = TRUE, set.names = TRUE,
   result
 }
 
+# toNumeric --------------------------------------------------------------------
+toNumeric <- function(x, columns)
+{
+  for (column in columns) {
+    x[, column] <- as.numeric(x[, column])
+  }
+  
+  x
+}
+
 # annual_load_rain -------------------------------------------------------------
 annual_load_rain <- function # calculates the load for each substance
 ### separates pathways (rain runoff, CSO and WWTP)
@@ -130,7 +140,7 @@ annual_load_rain <- function # calculates the load for each substance
   
   # Step 2: Monte Carlo simulations to get rain volumes
   
-  vol_rain$sd <- as.numeric(vol_rain$sd)
+  vol_rain <- toNumeric(vol_rain, "sd")
   
   MC_vol_rain_1 <- initMonteCarlo(
     x = vol_rain, runs = runs, log = FALSE, set.names = FALSE, seed = 3
@@ -163,14 +173,15 @@ annual_load_rain <- function # calculates the load for each substance
   # Step 2: Monte Carlo simulations to get removal rates
   
   # missing removal rates (mean and sd) are set = 0
-  removal_rates$Retention_. <- as.numeric(removal_rates$Retention_.)
-  removal_rates$Retention_sd <- as.numeric(removal_rates$Retention_sd)
+  removal_rates <- toNumeric(removal_rates, c("Retention_.", "Retention_sd"))
+
   removal_rates[which(is.na(removal_rates$Retention_.)), 2] <- 0
   removal_rates[which(is.na(removal_rates$Retention_sd)), 3] <- 0
   
   # get removal rates for substances in x_conc_NEU only (and in same order)
   removal_rates_red <- x_conc_NEU[, 1:2]
   indices <- match(removal_rates_red$VariableName, removal_rates$VariableName)
+  
   removal_rates_red$mean <- as.numeric(removal_rates$Retention_.[indices])
   removal_rates_red$sd <- as.numeric(removal_rates$Retention_sd[indices])
   
@@ -263,13 +274,11 @@ annual_load_sewage <- function # calculates the load for each substance
   # influent/effluent WWTP
   
   # read substance information
-  sub_sew_info$Retention_. <- as.numeric(sub_sew_info$Retention_.)
-  sub_sew_info$Retention_sd <- as.numeric(sub_sew_info$Retention_sd) 
-  sub_sew_info$CinWWTP_calculated <- as.numeric(sub_sew_info$CinWWTP_calculated)
-  sub_sew_info$CinWWTP_sd <- as.numeric((sub_sew_info$CinWWTP_sd))
-  sub_sew_info$CoutWWTP <- as.numeric(sub_sew_info$CoutWWTP)
-  sub_sew_info$CoutWWTP_sd <- as.numeric(sub_sew_info$CoutWWTP_sd)
+  columns <- c("Retention_.", "Retention_sd", "CinWWTP_calculated", 
+               "CinWWTP_sd", "CoutWWTP", "CoutWWTP_sd")
   
+  sub_sew_info <- toNumeric(sub_sew_info, columns)
+
   # set retention to zero, where information is lacking
   indices <- which(is.na(sub_sew_info$Retention_.))
   sub_sew_info$Retention_.[indices] <- 0
