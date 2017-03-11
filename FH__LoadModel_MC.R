@@ -67,7 +67,7 @@ initMonteCarlo <- function(x, runs, log = TRUE, set.names = TRUE,
     set.seed(seed)
   }
   
-  for (i in 1:ncol(result)) {
+  for (i in seq_len(ncol(result))) {
     
     result[[i]] <- if (log) {
       
@@ -194,7 +194,7 @@ annual_load_rain <- function # calculates the load for each substance
   VariableNames <- x_conc_NEU$VariableName
   SUW_Names_rain <- unique(vol_rain$SUW)
   
-  for (i in 1:length(VariableNames)) {
+  for (i in seq_along(VariableNames)) {
     
     load_rain_sum_paths[[i]] <- data.frame(matrix(
       ncol = length(SUW_Names_rain), 
@@ -204,7 +204,7 @@ annual_load_rain <- function # calculates the load for each substance
     colnames(load_rain_sum_paths[[i]]) <- SUW_Names_rain
     names(load_rain_sum_paths)[i] <- colnames(MC_conc_rain)[i]
     
-    for (j in 1:length(SUW_Names_rain)) {
+    for (j in seq_along(SUW_Names_rain)) {
       load_rain_sum_paths[[i]][j] <- (load_rain_cso[[i]][1 + j] 
                                       + load_rain_sep[[i]][1 + j] 
                                       + load_rain_wwtp[[i]][1 + j])
@@ -318,7 +318,7 @@ annual_load_sewage <- function # calculates the load for each substance
   VariableNames <- colnames(MC_conc_sew)
   SUW_Names_sew = unique(vol_sewage$SUW)
   
-  for (i in 1:length(VariableNames)) {
+  for (i in seq_along(VariableNames)) {
     
     load_sew_sum_paths[[i]] <- data.frame(matrix(
       ncol = length(SUW_Names_sew), 
@@ -328,7 +328,7 @@ annual_load_sewage <- function # calculates the load for each substance
     colnames(load_sew_sum_paths[[i]]) <- SUW_Names_sew
     names(load_sew_sum_paths)[i] <- colnames(MC_conc_sew)[i]
     
-    for (j in 1:length(SUW_Names_sew)) {
+    for (j in seq_along(SUW_Names_sew)) {
       load_sew_sum_paths[[i]][j] <- (load_sew_cso[[i]][1 + j] 
                                      + load_sew_wwtp[[i]][1 + j])
     }  
@@ -396,7 +396,7 @@ getloadsforCSOorSEP <- function
   # calculate loads in list
   load_x <- list()
   
-  for (e in 1:ncol(myconc_MC)) {
+  for (e in seq_len(ncol(myconc_MC))) {
     
     load_x[[e]] <- data.frame(
       "unit" = rep(x_conc_NEU$UnitsAbbreviation[e], times = nrow(myconc_MC))
@@ -407,13 +407,13 @@ getloadsforCSOorSEP <- function
     # get volume for each SUW
     SUW_Names <- unique(myvol_MC$SUW)
     
-    for (f in 1:length(SUW_Names)) {
+    for (f in seq_along(SUW_Names)) {
       
       indices <- which(myvol_MC$SUW == SUW_Names[f])
       vol_x_SUW <- myvol_MC[indices, ]
       load_x[[e]][[1 + f]] <- NA
       
-      for(run in 1:runs) {
+      for(run in seq_len(runs)) {
         
         condition <- vol_x_SUW$Parameter == myrowname
         
@@ -451,7 +451,7 @@ getloadsforWWTP <- function
   # calculate loads in list
   load_x <- list()
   
-  for(e in 1:ncol(myconc_MC)) {
+  for(e in seq_len(ncol(myconc_MC))) {
     
     load_x[[e]] <- data.frame(
       "unit" = rep(x_conc_NEU$UnitsAbbreviation[e], times = nrow(myconc_MC))
@@ -462,13 +462,13 @@ getloadsforWWTP <- function
     # get volume for each SUW
     SUW_Names <- unique(myvol_MC$SUW)
     
-    for (f in 1:length(SUW_Names)) {
+    for (f in seq_along(SUW_Names)) {
       
       indices <- which(myvol_MC$SUW == SUW_Names[f])
       vol_x_SUW <- myvol_MC[indices, ]
       load_x[[e]][[1 + f]] <- NA
       
-      for(run in 1:runs) {
+      for (run in seq_len(runs)) {
         
         condition <- vol_x_SUW$Parameter == myrowname
         
