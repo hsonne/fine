@@ -383,6 +383,58 @@ changeunit <- function(mytable)
   mytable
 }
 
+# getLoads ---------------------------------------------------------------------
+getLoads <- function
+(
+  concentration, 
+  # concentration of rain (for CSO) or rain with wrongcons (for sep) or sewage (CSO)
+  units = x_conc_NEU$UnitsAbbreviation, # just for names
+  volume, # rainwater or sewage volume
+  parameter,
+  removal = NULL
+)
+{
+  # calculate loads in list
+  load_x <- list()
+  
+  for (e in seq_len(ncol(concentration))) {
+    
+    load_x[[e]] <- data.frame(unit = rep(units[e], times = nrow(concentration)))
+    
+    names(load_x)[e] <- colnames(concentration)[e]
+    
+    # get volume for each SUW
+    SUW_Names <- unique(volume$SUW)
+    
+    for (f in seq_along(SUW_Names)) {
+      
+      indices <- which(volume$SUW == SUW_Names[f])
+      vol_x_SUW <- volume[indices, ]
+      
+      load_x[[e]][[1 + f]] <- NA
+      
+      for (run in seq_len(runs)) {
+        
+        condition <- vol_x_SUW$Parameter == parameter
+  
+        load <- concentration[run, e] * vol_x_SUW[condition, 2 + run]
+        
+        if (! is.null(removal)) {
+          load <- load * (1 - myremoval_MC[run, e] / 100)
+        }
+        
+        load_x[[e]][[1 + f]][run] <- load
+          
+        colnames(load_x[[e]])[1 + f] <- SUW_Names[f]
+      }
+    }
+    
+    changeunit(load_x[[e]])
+  }
+  
+  load_x
+}
+
 # getloadsforCSOorSEP ----------------------------------------------------------
 getloadsforCSOorSEP <- function
 (
@@ -401,43 +453,12 @@ getloadsforCSOorSEP <- function
   # myrowname = "ROWvol, Trennsystem [m3/a]"
   # myrowname = "ROWvol, CSO [m3/a]"
   
-  # calculate loads in list
-  load_x <- list()
-  
-  for (e in seq_len(ncol(myconc_MC))) {
-    
-    load_x[[e]] <- data.frame(
-      "unit" = rep(x_conc_NEU$UnitsAbbreviation[e], times = nrow(myconc_MC))
-    )
-    
-    names(load_x)[e] <- colnames(myconc_MC)[e]
-    
-    # get volume for each SUW
-    SUW_Names <- unique(myvol_MC$SUW)
-    
-    for (f in seq_along(SUW_Names)) {
-      
-      indices <- which(myvol_MC$SUW == SUW_Names[f])
-      vol_x_SUW <- myvol_MC[indices, ]
-      
-      load_x[[e]][[1 + f]] <- NA
-      
-      for(run in seq_len(runs)) {
-        
-        condition <- vol_x_SUW$Parameter == myrowname
-        
-        load_x[[e]][[1 + f]][run] <- myconc_MC[run, e] * 
-          vol_x_SUW[condition, 2 + run]
-        
-        colnames(load_x[[e]])[1 + f] <- SUW_Names[f]
-      }
-    }
-    
-    changeunit(load_x[[e]])
-  }
-  
-  load_x
-  
+  getLoads(
+    concentration = myconc_MC,
+    units = x_conc_NEU$UnitsAbbreviation,
+    volume = myvol_MC,
+    parameter = myrowname
+  )
 }
 
 # getloadsforWWTP --------------------------------------------------------------
@@ -457,42 +478,11 @@ getloadsforWWTP <- function
   # myrowname = "ROWvol, WWTP [m3/a]"
   # myremoval_MC = MC_removal_rates or MC_retention
   
-  # calculate loads in list
-  load_x <- list()
-  
-  for(e in seq_len(ncol(myconc_MC))) {
-    
-    load_x[[e]] <- data.frame(
-      "unit" = rep(x_conc_NEU$UnitsAbbreviation[e], times = nrow(myconc_MC))
-    )
-    
-    names(load_x)[e] <- colnames(myconc_MC)[e]
-    
-    # get volume for each SUW
-    SUW_Names <- unique(myvol_MC$SUW)
-    
-    for (f in seq_along(SUW_Names)) {
-      
-      indices <- which(myvol_MC$SUW == SUW_Names[f])
-      vol_x_SUW <- myvol_MC[indices, ]
-      
-      load_x[[e]][[1 + f]] <- NA
-      
-      for (run in seq_len(runs)) {
-        
-        condition <- vol_x_SUW$Parameter == myrowname
-        
-        load_x[[e]][[1 + f]][run] <- (
-          myconc_MC[run, e] * vol_x_SUW[condition, 2 + run] * 
-            (1 - myremoval_MC[run, e] / 100)
-        )
-        
-        colnames(load_x[[e]])[1 + f] <- SUW_Names[f]
-      }
-    }
-    
-    changeunit(load_x[[e]])
-  }
-  
-  load_x
+  getLoads(
+    concentration = myconc_MC,
+    units = x_conc_NEU$UnitsAbbreviation,
+    volume = myvol_MC,
+    parameter = myrowname,
+    removal = myremoval_MC
+  )
 }
