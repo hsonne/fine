@@ -11,17 +11,24 @@ require(dplyr)
 # 2. directory of additional data
 data.dir <- "C:/Users/Fine/Desktop/Diplomarbeit/LoadModel/data_LoadModel"
 
+# Define unit conversion factors
+CONVERSION_FACTORS <- c(
+  "mg/L" = 1 / 1000,
+  "MPN/100 mL" = 10000,
+  "PFU/100 mL" = 10000
+)
+
 # MAIN
-if (FALSE){
-  
+if (FALSE)
+{
   # number of Monte Carlo simulations
   runs <- 1000 
   
   # 1. calculate loads of rainwater-based substances (for three pathways) 
   
   # proportion of wrong connections in seperate sewer system
-  x = 0
-  y = 1 - x
+  x <- 0
+  y <- 1 - x
   
   x_annual_loads_rain <- annual_load_rain(data.dir = data.dir)
   
