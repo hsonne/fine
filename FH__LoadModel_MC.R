@@ -152,14 +152,14 @@ annual_load_rain <- function # calculates the load for each substance
   
   # Step 3: Calculation of loads in list, sep + CSO
   
-  load_rain_sep <- getloadsforCSOorSEP(
+  load_rain_sep <- getLoads(
     concentration = MC_conc_rain_sep,
     units = x_conc_NEU$UnitsAbbreviation, 
     volume = MC_vol_rain,
     parameter = "ROWvol, Trennsystem [m3/a]"
   )
   
-  load_rain_cso <- getloadsforCSOorSEP(
+  load_rain_cso <- getLoads(
     concentration = MC_conc_rain,
     units = x_conc_NEU$UnitsAbbreviation,
     volume = MC_vol_rain,
@@ -192,14 +192,14 @@ annual_load_rain <- function # calculates the load for each substance
   
   # Step 3: Calculation of loads in list, WWTP
   
-  load_rain_wwtp <- getloadsforWWTP(
+  load_rain_wwtp <- getLoads(
     concentration = MC_conc_rain,
     units = x_conc_NEU$UnitsAbbreviation,
     volume = MC_vol_rain,
     parameter = "ROWvol, WWTP [m3/a]",
     removal = MC_removal_rates
   )
-  
+
   # sum paths (in list)
   
   load_rain_sum_paths <- list()
@@ -305,22 +305,24 @@ annual_load_sewage <- function # calculates the load for each substance
   # Step 3: Calculation of loads in list, CSO + WWTP
   
   ## CSO
-  load_sew_cso <- getloadsforCSOorSEP(
+
+  load_sew_cso <- getLoads(
     concentration = MC_conc_sew,
     units = x_conc_NEU$UnitsAbbreviation, 
-    volume = MC_vol_sewage,
+    volume = MC_vol_sewage, 
     parameter = "ROWvol, CSO [m3/a]"
   )
   
-  ##WWTP
-  load_sew_wwtp <- getloadsforWWTP(
+  ## WWTP
+
+  load_sew_wwtp <- getLoads(
     concentration = MC_conc_sew, 
     units = x_conc_NEU$UnitsAbbreviation,
     volume = MC_vol_sewage,
     parameter = "ROWvol, WWTP [m3/a]",
     removal = MC_retention
   )
-  
+
   # sum paths (in list)
   load_sew_sum_paths <- list()
   VariableNames <- colnames(MC_conc_sew)
@@ -433,45 +435,4 @@ getLoads <- function
   }
   
   load_x
-}
-
-# getloadsforCSOorSEP ----------------------------------------------------------
-getloadsforCSOorSEP <- function
-(
-  concentration, # concentration of rain (for CSO) or 
-  # rain with wrongcons (for sep) or sewage (CSO)
-  units, # just for names
-  volume, # rainwater or sewage volume
-  parameter
-)
-{
-  # concentration = MC_conc_rain
-  # concentration = MC_conc_rain_sep
-  # concentration = MC_conc_sew
-  # volume = MC_vol_rain
-  # volume = MC_vol_sewage
-  # parameter = "ROWvol, Trennsystem [m3/a]"
-  # parameter = "ROWvol, CSO [m3/a]"
-  
-  getLoads(concentration, units, volume, parameter)
-}
-
-# getloadsforWWTP --------------------------------------------------------------
-getloadsforWWTP <- function
-(
-  concentration, # concentration of rainwater or sewage
-  units, # just for names
-  volume, # rainwater or sewage volume
-  parameter,
-  removal
-)
-{
-  # concentration = MC_conc_rain
-  # concentration = MC_Cin
-  # volume = MC_vol_rain
-  # volume = MC_vol_sewage
-  # parameter = "ROWvol, WWTP [m3/a]"
-  # removal = MC_removal_rates or MC_retention
-  
-  getLoads(concentration, units, volume, parameter, removal)
 }
