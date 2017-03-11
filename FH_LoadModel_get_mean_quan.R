@@ -81,20 +81,15 @@ if (FALSE)
   
   # load_rain_cso + load_sew_cso
   
-  load_cso_comb <- list()
-  
-  for (i in seq_along(VariableNames)){
-    
-    x <- load_rain_cso[[i]]
-    
-    for (column in SUW_Names_sew) {
-      
-      x[, column] <- x[, column] + load_sew_cso[[i]][, column]
-    }
-    
-    element <- VariableNames[i]
-    load_cso_comb[[element]] <- x
-  }
+  load_cso_comb <- lapply(seq_along(VariableNames), function(i) {
+      x <- load_rain_cso[[i]]
+      y <- load_sew_cso[[i]]
+      for (column in SUW_Names_sew) {
+        x[, column] <- x[, column] + y[, column]
+      }
+      x
+  })
+  names(load_cso_comb) <- VariableNames
   
   # get mean and quantiles for load_cso
   
@@ -103,21 +98,16 @@ if (FALSE)
   
   # load_rain_wwtp + load_sew_wwtp
   
-  load_wwtp_comb <- list()
-  
-  for (i in seq_along(VariableNames)){
-    
+  load_wwtp_comb <- lapply(seq_along(VariableNames), function(i) {
     x <- load_rain_wwtp[[i]]
-    
+    y <- load_sew_wwtp[[i]]
     for (column in SUW_Names_sew) {
-      
-      x[, column] <- x[, column] + load_sew_wwtp[[i]][, column]
+      x[, column] <- x[, column] + y[, column]
     }
+    x
+  })
+  names(load_wwtp_comb) <- VariableNames
     
-    element <- VariableNames[i]
-    load_wwtp_comb[[element]] <- x
-  }
-  
   # get mean and quantiles for load_wwtp
   
   load_wwtp_mean_quan <- MeanQuantilesforloads(
@@ -125,20 +115,15 @@ if (FALSE)
   
   # total load in rainwater + sewage
   
-  load_TOT <- list()
-  
-  for (i in seq_along(VariableNames)){
-    
+  load_TOT <- lapply(seq_along(VariableNames), function(i) {
     x <- load_rain_sum_path[[i]]
-    
+    y <- load_sew_sum_path[[i]]
     for (column in SUW_Names_sew) {
-      
-      x[, column] <- x[, column] + load_sew_sum_path[[i]][, column]
+      x[, column] <- x[, column] + y[, column]
     }
-    
-    element <- VariableNames[i]
-    load_TOT[[element]] <- x
-  }
+    x
+  })
+  names(load_TOT) <- VariableNames
   
   # get mean and quantiles for total load
   
@@ -271,8 +256,8 @@ if (FALSE)
   
   loads_rain_by_path_mean_quan <- list()
   
-  for (e in seq_along(SUW_Names_rain))
-  {
+  for (e in seq_along(SUW_Names_rain)) {
+    
     loads_rain_by_path_mean_quan[[e]] <- data.frame(
       VariableName = x_conc_NEU$VariableName,
       SEP_mean = 0, 
@@ -441,7 +426,7 @@ MeanQuantilesforloads <- function
   )
 }
 
-### Get mean and quantiles for loads in different combinations----------------
+### Get mean and quantiles for loads in different combinations -----------------
 MeanQuantilesforloadscomb <- function
 (
   volume, # just for names
