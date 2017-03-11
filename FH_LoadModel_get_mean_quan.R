@@ -395,33 +395,26 @@ if (FALSE)
 
 ### FUNCTIONS ###
 
-### Get mean and quantiles for loads in rainwater or sewage and all pathways----
-MeanQuantilesforloads <- function
-(
-  myvolume, # just for names
-  x_conc_NEU, # just for names
-  myloads # loads in rainwater or sewage
-) 
+# meanQuantiles ----------------------------------------------------------------
+# loads: loads in rainwater or sewage
+meanQuantiles <- function(suwNames, variableNames, loads, offset)
 {
   mylist <- list()
   
-  SUW_Names <- unique(myvolume$SUW)
-  VariableNames <- x_conc_NEU$VariableName
-  
-  for (a in seq_along(VariableNames)) {
+  for (a in seq_along(variableNames)) {
     
     mylist[[a]] <- data.frame(matrix(
-      ncol = (1 + length(SUW_Names)), nrow = 3
+      ncol = (1 + length(suwNames)), nrow = 3
     ))
     
     mylist[[a]][, 1] <- c("mean", "Quan 5", "Quan 95")
-    names(mylist)[a] <- VariableNames[a]
+    names(mylist)[a] <- variableNames[a]
     
-    for (b in seq_along(SUW_Names)) {
+    for (b in seq_along(suwNames)) {
       
-      colnames(mylist[[a]]) <- c("Value", SUW_Names)
+      colnames(mylist[[a]]) <- c("Value", suwNames)
       
-      x <- myloads[[a]][, 1 + b]
+      x <- loads[[a]][, offset + b]
       
       mylist[[a]][1, 1 + b] <- mean(x)
       mylist[[a]][2, 1 + b] <- quantile(x, probs = 0.05)
@@ -432,6 +425,22 @@ MeanQuantilesforloads <- function
   mylist
 }
 
+### Get mean and quantiles for loads in rainwater or sewage and all pathways----
+MeanQuantilesforloads <- function
+(
+  myvolume, # just for names
+  x_conc_NEU, # just for names
+  myloads # loads in rainwater or sewage
+)
+{
+  meanQuantiles(
+    suwNames = unique(selectColumns(myvolume, "SUW")),
+    variableNames = selectColumns(x_conc_NEU, "VariableName"),
+    loads = myloads,
+    offset = 1
+  )
+}
+
 ### Get mean and quantiles for loads in different combinations----------------
 MeanQuantilesforloadscomb <- function
 (
@@ -440,31 +449,10 @@ MeanQuantilesforloadscomb <- function
   myloads # combined loads
 ) 
 {
-  mylist <- list()
-  
-  SUW_Names_rain <- unique(vol_rain$SUW)
-  VariableNames <- x_conc_NEU$VariableName
-  
-  for (a in seq_along(VariableNames)) {
-    
-    mylist[[a]] <- data.frame(matrix(
-      ncol = (1 + length(SUW_Names_rain)), nrow = 3
-    ))
-    
-    mylist[[a]][,1] <- c("mean", "Quan 5", "Quan 95")
-    names(mylist)[a] <- VariableNames[a]
-    
-    for (b in seq_along(SUW_Names_rain)) {
-      
-      colnames(mylist[[a]]) <- c("Value", SUW_Names_rain)
-      
-      x <- (myloads[[a]][, b])
-      
-      mylist[[a]][1, 1 + b] <- mean(x)
-      mylist[[a]][2, 1 + b] <- quantile(x, probs = 0.05)
-      mylist[[a]][3, 1 + b] <- quantile(x, probs = 0.95)
-    }
-  }
-  
-  mylist
+  meanQuantiles(
+    suwNames = unique(selectColumns(vol_rain, "SUW")),
+    variableNames = selectColumns(x_conc_NEU, "VariableName"),
+    loads = myloads,
+    offset = 0
+  )
 }
