@@ -201,7 +201,8 @@ readTableOrStop <- function(data.dir, filename, type, csv2 = FALSE)
     
   } else {
     
-    stop(sprintf("File with %s (%s) not found in data.dir", type, filename))
+    stop(sprintf("File with %s (%s) not found in data.dir (%s)", 
+                 type, filename, data.dir))
   }
 }
 
