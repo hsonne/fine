@@ -70,7 +70,7 @@ initMonteCarlo <- function(x, runs, log = TRUE, set.names = TRUE,
   FUN.norm <- ifelse(log, rlnorm, rnorm)
   
   for (row in seq_len(ncol(result))) {
-    result[[i]] <- FUN.norm(runs, x[row, column.mean], x[row, column.sd])
+    result[[row]] <- FUN.norm(runs, x[row, column.mean], x[row, column.sd])
   }
   
   result
