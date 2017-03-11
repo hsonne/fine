@@ -48,14 +48,19 @@ readTableOrStop <- function(data.dir, filename, type, csv2 = FALSE)
       read.table(file = file, sep = ";", dec = ".", stringsAsFactors = FALSE, 
                  header = TRUE)
     }
-  } else stop(sprintf(
-    "File with %s (%s) not found in data.dir", type, filename
-  ))
+    
+  } else {
+    
+    stop(sprintf("File with %s (%s) not found in data.dir", type, filename))
+  }
 }
 
 # initMonteCarlo ---------------------------------------------------------------
-initMonteCarlo <- function(x, runs, log = TRUE, set.names = TRUE, 
-                           column.mean = "mean", column.sd = "sd", seed = NULL)
+initMonteCarlo <- function
+(
+  x, runs, log = TRUE, set.names = TRUE, column.mean = "mean", column.sd = "sd",
+  seed = NULL
+)
 {
   result <- data.frame(matrix(ncol = nrow(x), nrow = runs))
   
@@ -135,7 +140,7 @@ annual_load_rain <- function # calculates the load for each substance
   ### removal at WWTP "substance_info.csv")
 ) 
 {
-  #load data
+  # load data
   x_conc_NEU <- readTableOrStop(
     data.dir, filename = "NEU_meanln_sdln.csv", 
     type = "annual mean concentrations of rainwater"
@@ -201,7 +206,8 @@ annual_load_rain <- function # calculates the load for each substance
   ### loads of rainwater based substances via WWTP
   
   # Step 1: MC to get concentration in rainwater and rain volume calculation is 
-  # already done (MC_conc_rain, MC_vol_rain)
+  #   already done (MC_conc_rain, MC_vol_rain)
+  
   # Step 2: Monte Carlo simulations to get removal rates
   
   # missing removal rates (mean and sd) are set = 0
@@ -249,9 +255,9 @@ annual_load_rain <- function # calculates the load for each substance
     names(load_rain_sum_paths)[i] <- colnames(MC_conc_rain)[i]
     
     for (j in seq_along(SUW_Names_rain)) {
-      load_rain_sum_paths[[i]][j] <- (load_rain_cso[[i]][1 + j] 
-                                      + load_rain_sep[[i]][1 + j] 
-                                      + load_rain_wwtp[[i]][1 + j])
+      
+      load_rain_sum_paths[[i]][j] <- load_rain_cso[[i]][1 + j] + 
+        load_rain_sep[[i]][1 + j] + load_rain_wwtp[[i]][1 + j]
     }
   }
   
@@ -276,7 +282,7 @@ annual_load_sewage <- function # calculates the load for each substance
 ) 
   
 {
-  #load data
+  # load data
   x_conc_NEU <- readTableOrStop(
     data.dir, filename = "NEU_meanln_sdln.csv", 
     type = "annual mean concentrations of rainwater"
@@ -371,8 +377,9 @@ annual_load_sewage <- function # calculates the load for each substance
     names(load_sew_sum_paths)[i] <- colnames(MC_conc_sew)[i]
     
     for (j in seq_along(SUW_Names_sew)) {
-      load_sew_sum_paths[[i]][j] <- (load_sew_cso[[i]][1 + j] 
-                                     + load_sew_wwtp[[i]][1 + j])
+      
+      load_sew_sum_paths[[i]][j] <- load_sew_cso[[i]][1 + j] + 
+        load_sew_wwtp[[i]][1 + j]
     }  
   }
   
@@ -395,7 +402,6 @@ changeunit <- function(mytable)
     
     # apply convert value to all column except for "unit"
     mytable[, -which(names(mytable) == "unit")] <- mytable[, -which(names(mytable) == "unit")] / 1000
-    
   }
   
   # if unit is MPN/100 mL
@@ -403,7 +409,6 @@ changeunit <- function(mytable)
     
     # apply convert value to all column except for "unit"
     mytable[, -which(names(mytable) == "unit")] <- mytable[, -which(names(mytable) == "unit")] * 10000
-    
   }
   
   # if unit is PFU/100 mL
@@ -411,7 +416,6 @@ changeunit <- function(mytable)
     
     # apply convert value to all column except for "unit"
     mytable[, -which(names(mytable) == "unit")] <- mytable[, -which(names(mytable) == "unit")] * 10000
-    
   }
   
   mytable
@@ -421,9 +425,12 @@ changeunit <- function(mytable)
 getLoads <- function
 (
   concentration, 
-  # concentration of rain (for CSO) or rain with wrongcons (for sep) or sewage (CSO)
-  units = x_conc_NEU$UnitsAbbreviation, # just for names
-  volume, # rainwater or sewage volume
+  ### concentration of rain (for CSO) or rain with wrongcons (for sep) or sewage
+  ### (CSO)
+  units, 
+  ### abbreviated unit names
+  volume, 
+  ### rainwater or sewage volume
   parameter,
   removal = NULL
 )
