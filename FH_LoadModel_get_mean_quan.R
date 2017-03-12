@@ -187,9 +187,13 @@ meanQuantiles <- function(offset, suwNames, variables, loads)
 {
   result <- list()
 
-  subresult.0 <- data.frame(matrix(ncol = (1 + length(suwNames)), nrow = 3))
-  subresult.0[, 1] <- c("mean", "Quan 5", "Quan 95")
-  colnames(subresult.0) <- c("Value", suwNames)
+  columns <- c("Value", suwNames)
+  stats <- c("mean", "Quan 5", "Quan 95")
+  
+  subresult.0 <- data.frame(matrix(ncol = length(columns), nrow = length(stats)))
+  
+  subresult.0[, 1] <- stats
+  colnames(subresult.0) <- columns
   
   for (a in seq_along(variables)) {
     
@@ -205,6 +209,7 @@ meanQuantiles <- function(offset, suwNames, variables, loads)
   
   result
 }
+
 
 # getStats ---------------------------------------------------------------------
 getStats <- function(x)
