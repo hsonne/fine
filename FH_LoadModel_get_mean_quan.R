@@ -205,7 +205,8 @@ meanQuantiles <- function(offset, suwNames, variables, loads)
 }
 
 # initStats --------------------------------------------------------------------
-initStats <- function(suwNames, stats = c("mean", "Quan 5", "Quan 95"))
+initStats <- function(suwNames, stats = c("mean", "Quan 5", "Quan 95"), 
+                      column.stats = "Value")
 {
   columns <- c("Value", suwNames)
   
@@ -290,16 +291,13 @@ aggregateBySUW <- function(data, FUN, ...)
 # toOverview -------------------------------------------------------------------
 toOverview <- function(suwNames, means, quantiles5, quantiles95)
 {
-  result <- data.frame(matrix(ncol = 1 + length(suwNames), nrow = 3))
-  
-  colnames(result) <- c("Values", suwNames)
-  result[, 1] <- c("mean", "Quan 5", "Quan 95")
+  result <- initStats(suwNames, column.stats = "Values")
   
   for (column in suwNames) {
     
-    result[1, column] <- means[2, column]
-    result[2, column] <- quantiles5[2, column]
-    result[3, column] <- quantiles95[2, column]
+    result[1:3, column] <- c(
+      means[2, column], quantiles5[2, column], quantiles95[2, column]
+    )
   }
   
   result
