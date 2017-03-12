@@ -271,28 +271,14 @@ toTotal <- function(x, suwNames)
   
   sum_SUW <- aggregate(volume ~ SUW + run, data = x.long, FUN = sum)
   
-  # one data frame for mean and quantiles of rain volumes
-  toOverview(
-    suwNames = suwNames, 
-    means = aggregateBySUW(sum_SUW, mean), 
-    quantiles5 = aggregateBySUW(sum_SUW, quantile, probs = 0.05), 
-    quantiles95 = aggregateBySUW(sum_SUW, quantile, probs = 0.95)
-  )
-}
-
-# aggregateBySUW ---------------------------------------------------------------
-aggregateBySUW <- function(data, FUN, ...) 
-{
-  result <- t(aggregate(volume ~ SUW, data = data, FUN = FUN, ...))
-  colnames(result) <- result[1, ]
-  result
-}
-
-# toOverview -------------------------------------------------------------------
-toOverview <- function(suwNames, means, quantiles5, quantiles95)
-{
+  means <- aggregateBySUW(sum_SUW, mean)
+  quantiles5 <- aggregateBySUW(sum_SUW, quantile, probs = 0.05)
+  quantiles95 <- aggregateBySUW(sum_SUW, quantile, probs = 0.95)
+  
+  # Initialise statistics data frame
   result <- initStats(suwNames, column.stats = "Values")
   
+  # Fill the statistics data frame
   for (column in suwNames) {
     
     result[1:3, column] <- c(
@@ -300,6 +286,14 @@ toOverview <- function(suwNames, means, quantiles5, quantiles95)
     )
   }
   
+  result
+}
+
+# aggregateBySUW ---------------------------------------------------------------
+aggregateBySUW <- function(data, FUN, ...) 
+{
+  result <- t(aggregate(volume ~ SUW, data = data, FUN = FUN, ...))
+  colnames(result) <- result[1, ]
   result
 }
 
