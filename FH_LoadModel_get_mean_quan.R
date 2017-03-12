@@ -186,6 +186,53 @@ if (FALSE)
 
 ### FUNCTIONS ###
 
+# meanQuantiles ----------------------------------------------------------------
+# loads: loads in rainwater or sewage
+meanQuantiles <- function(offset, suwNames, variables, loads)
+{
+  result <- list()
+  
+  for (a in seq_along(variables)) {
+    
+    result[[a]] <- data.frame(matrix(ncol = (1 + length(suwNames)), nrow = 3))
+    
+    result[[a]][, 1] <- c("mean", "Quan 5", "Quan 95")
+    names(result)[a] <- variables[a]
+    
+    for (b in seq_along(suwNames)) {
+      
+      colnames(result[[a]]) <- c("Value", suwNames)
+      
+      x <- loads[[a]][, offset + b]
+      
+      result[[a]][1, 1 + b] <- mean(x)
+      result[[a]][2, 1 + b] <- quantile(x, probs = 0.05)
+      result[[a]][3, 1 + b] <- quantile(x, probs = 0.95) 
+    }
+  }
+  
+  result
+}
+
+# combineLoads -----------------------------------------------------------------
+combineLoads <- function(variables, x, y)
+{
+  result <- lapply(seq_along(variables), function(i) {
+    
+    xi <- x[[i]]
+    yi <- y[[i]]
+    
+    for (column in SUW_Names_sew) {
+      xi[, column] <- xi[, column] + yi[, column]
+    }
+    
+    xi
+  })
+  
+  # name the list elements and return
+  structure(result, names = variables)
+}
+
 # getMeanAndQuantiles ----------------------------------------------------------
 getMeanAndQuantiles <- function(x, monteCarlo, suwNames, multiple)
 {
@@ -234,6 +281,24 @@ aggregateBySUW <- function(data, FUN, ...)
   result
 }
 
+# toOverview -------------------------------------------------------------------
+toOverview <- function(suwNames, means, quantiles5, quantiles95)
+{
+  result <- data.frame(matrix(ncol = 1 + length(suwNames), nrow = 3))
+  
+  colnames(result) <- c("Values", suwNames)
+  result[, 1] <- c("mean", "Quan 5", "Quan 95")
+  
+  for (column in suwNames) {
+    
+    result[1, column] <- means[2, column]
+    result[2, column] <- quantiles5[2, column]
+    result[3, column] <- quantiles95[2, column]
+  }
+  
+  result
+}
+
 # summarise_loads --------------------------------------------------------------
 summarise_loads <- function(suwNames, variables, inputs, columns) 
 {
@@ -274,69 +339,4 @@ summarise_loads <- function(suwNames, variables, inputs, columns)
   })
   
   structure(result, names = suwNames)
-}
-
-# combineLoads -----------------------------------------------------------------
-combineLoads <- function(variables, x, y)
-{
-  result <- lapply(seq_along(variables), function(i) {
-    
-    xi <- x[[i]]
-    yi <- y[[i]]
-    
-    for (column in SUW_Names_sew) {
-      xi[, column] <- xi[, column] + yi[, column]
-    }
-    
-    xi
-  })
-  
-  # name the list elements and return
-  structure(result, names = variables)
-}
-
-# meanQuantiles ----------------------------------------------------------------
-# loads: loads in rainwater or sewage
-meanQuantiles <- function(offset, suwNames, variables, loads)
-{
-  result <- list()
-  
-  for (a in seq_along(variables)) {
-    
-    result[[a]] <- data.frame(matrix(ncol = (1 + length(suwNames)), nrow = 3))
-    
-    result[[a]][, 1] <- c("mean", "Quan 5", "Quan 95")
-    names(result)[a] <- variables[a]
-    
-    for (b in seq_along(suwNames)) {
-      
-      colnames(result[[a]]) <- c("Value", suwNames)
-      
-      x <- loads[[a]][, offset + b]
-      
-      result[[a]][1, 1 + b] <- mean(x)
-      result[[a]][2, 1 + b] <- quantile(x, probs = 0.05)
-      result[[a]][3, 1 + b] <- quantile(x, probs = 0.95) 
-    }
-  }
-  
-  result
-}
-
-# toOverview -------------------------------------------------------------------
-toOverview <- function(suwNames, means, quantiles5, quantiles95)
-{
-  result <- data.frame(matrix(ncol = 1 + length(suwNames), nrow = 3))
-
-  colnames(result) <- c("Values", suwNames)
-  result[, 1] <- c("mean", "Quan 5", "Quan 95")
-  
-  for (column in suwNames) {
-    
-    result[1, column] <- means[2, column]
-    result[2, column] <- quantiles5[2, column]
-    result[3, column] <- quantiles95[2, column]
-  }
-  
-  result
 }
