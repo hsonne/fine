@@ -152,26 +152,27 @@ annual_load_rain <- function # calculates the load for each substance
   
   # sum paths (in list)
   
-  load_rain_sum_paths <- list()
   VariableNames <- x_conc_NEU$VariableName
   SUW_Names_rain <- unique(vol_rain$SUW)
+
+  columns <- SUW_Names_rain
+  out.init <- data.frame(matrix(ncol = length(columns), nrow = runs))
+  colnames(out.init) <- columns
   
-  for (i in seq_along(VariableNames)) {
+  load_rain_sum_paths <- lapply(seq_along(VariableNames), function(i) {
+
+    out <- out.init
     
-    load_rain_sum_paths[[i]] <- data.frame(matrix(
-      ncol = length(SUW_Names_rain), 
-      nrow = runs
-    ))
-    
-    colnames(load_rain_sum_paths[[i]]) <- SUW_Names_rain
-    names(load_rain_sum_paths)[i] <- colnames(MC_conc_rain)[i]
-    
-    for (j in seq_along(SUW_Names_rain)) {
+    for (j in seq_along(columns)) {
       
-      load_rain_sum_paths[[i]][j] <- load_rain_cso[[i]][1 + j] + 
-        load_rain_sep[[i]][1 + j] + load_rain_wwtp[[i]][1 + j]
+      out[j] <- load_rain_cso[[i]][1 + j] + load_rain_sep[[i]][1 + j] + 
+        load_rain_wwtp[[i]][1 + j]
     }
-  }
+       
+    out
+  })
+  
+  names(load_rain_sum_paths) <- colnames(MC_conc_rain)
   
   # output
   list(
