@@ -18,7 +18,17 @@ CONVERSION_FACTORS <- c(
   "PFU/100 mL" = 10000
 )
 
-# MAIN
+# Define file types (name without extension and content description)
+FILE_TYPES <- c(
+  NEU_meanln_sdln = "annual mean concentrations of rainwater",
+  BKE_meanln_sdln = paste("annual mean concentrations of rainwater with", 
+                          "wrong connections"),
+  Vol_rain        = "rain runoff",
+  Vol_sewage      = "sewage runoff",
+  substance_info  = "removal rates at WWTP/substance information WWTP"
+)
+
+# MAIN -------------------------------------------------------------------------
 if (FALSE)
 {
   # number of Monte Carlo simulations
@@ -29,11 +39,11 @@ if (FALSE)
   # proportion of wrong connections in seperate sewer system
   prop.wrong <- 0
 
-  x_annual_loads_rain <- annual_load_rain(data.dir = data.dir)
+  x_annual_loads_rain <- annual_load_rain(data.dir, FILE_TYPES)
   
   # 2. calculate loads of sewage based substances 
   
-  x_annual_loads_sew <- annual_load_sewage(data.dir = data.dir)
+  x_annual_loads_sew <- annual_load_sewage(data.dir, FILE_TYPES)
 }
 
 ### FUNCTIONS ###
@@ -42,22 +52,14 @@ if (FALSE)
 annual_load_rain <- function # calculates the load for each substance
 ### separates pathways (rain runoff, CSO and WWTP)
 (
-  data.dir
+  data.dir,
   ### path of model data (annual mean concentrations "NEU_meanln_sdln.csv",
   #### mean concentrations with wrong connections "BKE_meanln_sdln.csv"
   ### rain runoff volumes "Vol_rain.csv, 
   ### removal at WWTP "substance_info.csv")
+  types
 ) 
 {
-  # Define file types
-  types <- c(
-    NEU_meanln_sdln = "annual mean concentrations of rainwater",
-    BKE_meanln_sdln = paste("annual mean concentrations of rainwater with", 
-                                "wrong connections"),
-    Vol_rain        = "rain runoff",
-    substance_info  = "removal rates at WWTP"
-  )
-  
   # load data
   name <- "NEU_meanln_sdln"
   x_conc_NEU <- readTableOrStop(data.dir, name, types[name])
@@ -348,20 +350,13 @@ sumPaths <- function(suwNames, variables, runs, inputs)
 annual_load_sewage <- function # calculates the load for each substance
 ### separates pathways (CSO and WWTP)
 (
-  data.dir
+  data.dir,
   ### path of model data("Vol_sewage.csv",
   ### removal at WWTP "substance_info.csv",
   ### just for names "x_conc_NEU")
+  types
 ) 
-  
 {
-  # Define file types
-  types <- c(
-    NEU_meanln_sdln = "annual mean concentrations of rainwater",
-    Vol_sewage = "sewage runoff",
-    substance_info = "substance information WWTP"
-  )
-  
   # load data
   name <- "NEU_meanln_sdln"
   x_conc_NEU <- readTableOrStop(data.dir, name, types[name])
