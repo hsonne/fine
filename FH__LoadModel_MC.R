@@ -397,7 +397,7 @@ annual_load_sewage <- function # calculates the load for each substance
   MC_vol_sew <- initMonteCarlo(
     x = vol_sewage, runs = runs, log = FALSE, set.names = FALSE, seed = 2
   )
-
+  
   MC_vol_sew <- vol_sewage[, 1:2]
   MC_vol_sewage <- cbind(MC_vol_sew, t(MC_vol_sew))
   
@@ -409,7 +409,7 @@ annual_load_sewage <- function # calculates the load for each substance
                "CinWWTP_sd", "CoutWWTP", "CoutWWTP_sd")
   
   sub_sew_info <- toNumeric(sub_sew_info, columns)
-
+  
   # set retention to zero, where information is lacking
   sub_sew_info$Retention_.[is.na(sub_sew_info$Retention_.)] <- 0
   sub_sew_info$Retention_sd[is.na(sub_sew_info$Retention_sd)] <- 0
@@ -419,7 +419,7 @@ annual_load_sewage <- function # calculates the load for each substance
     x = sub_sew_info, runs = runs, log = FALSE, set.names = TRUE,
     column.mean = "Retention_.", column.sd = "Retention_sd", seed = 6
   )
-
+  
   # MC to get concentrations in wastewater
   MC_conc_sew <- initMonteCarlo(
     x = sub_sew_info, runs = runs, log = TRUE, set.names = TRUE, 
@@ -431,14 +431,14 @@ annual_load_sewage <- function # calculates the load for each substance
     x = sub_sew_info, runs = runs, log = TRUE, set.names = TRUE, 
     column.mean = "CoutWWTP", column.sd = "CoutWWTP_sd", seed = 8
   )
-
+  
   # Provide units
   units <- selectColumns(x_conc_NEU, "UnitsAbbreviation")
   
   # Step 3: Calculation of loads in list, CSO + WWTP
-
+  
   ## CSO
-
+  
   load_sew_cso <- getLoads(
     concentration = MC_conc_sew,
     units = units, 
@@ -447,7 +447,7 @@ annual_load_sewage <- function # calculates the load for each substance
   )
   
   ## WWTP
-
+  
   load_sew_wwtp <- getLoads(
     concentration = MC_conc_sew, 
     units = units,
@@ -455,28 +455,29 @@ annual_load_sewage <- function # calculates the load for each substance
     parameter = "ROWvol, WWTP [m3/a]",
     removal = MC_retention
   )
-
+  
   # sum paths (in list)
-  load_sew_sum_paths <- list()
+  
   VariableNames <- colnames(MC_conc_sew)
   SUW_Names_sew = unique(vol_sewage$SUW)
   
-  for (i in seq_along(VariableNames)) {
+  columns <- SUW_Names_sew
+  out.init <- data.frame(matrix(ncol = length(columns), nrow = runs))
+  colnames(out.init) <- columns
+  
+  load_sew_sum_paths <- lapply(seq_along(VariableNames), function(i) {
     
-    load_sew_sum_paths[[i]] <- data.frame(matrix(
-      ncol = length(SUW_Names_sew), 
-      nrow = runs
-    ))
+    out <- out.init
     
-    colnames(load_sew_sum_paths[[i]]) <- SUW_Names_sew
-    names(load_sew_sum_paths)[i] <- colnames(MC_conc_sew)[i]
-    
-    for (j in seq_along(SUW_Names_sew)) {
+    for (j in seq_along(columns)) {
       
-      load_sew_sum_paths[[i]][j] <- load_sew_cso[[i]][1 + j] + 
-        load_sew_wwtp[[i]][1 + j]
-    }  
-  }
+      out[j] <- load_sew_cso[[i]][1 + j] + load_sew_wwtp[[i]][1 + j]
+    }
+    
+    out
+  })
+  
+  names(load_sew_sum_paths) <- colnames(MC_conc_sew)
   
   # output
   list(
