@@ -167,31 +167,6 @@ annual_load_rain <- function # calculates the load for each substance
   )
 }
 
-# sumPaths ---------------------------------------------------------------------
-sumPaths <- function(suwNames, variables, runs, inputs)
-{
-  out.init <- data.frame(matrix(ncol = length(suwNames), nrow = runs))
-  colnames(out.init) <- suwNames
-  
-  result <- lapply(seq_along(variables), function(i) {
-    
-    out <- out.init
-    
-    for (j in seq_along(suwNames)) {
-      
-      # Get the appropriate column vectors from the input lists
-      vectors <- lapply(inputs, function(input) input[[i]][, 1 + j])
-      
-      # Calculate the sum vector and assign it to out[, j]
-      out[, j] <- Reduce("+", vectors)
-    }
-    
-    out
-  })
-  
-  structure(result, names = variables)
-}
-
 # readTableOrStop --------------------------------------------------------------
 readTableOrStop <- function
 (
@@ -222,32 +197,6 @@ readTableOrStop <- function
 
 # initMonteCarlo ---------------------------------------------------------------
 initMonteCarlo <- function
-(
-  x, runs, log = TRUE, set.names = TRUE, column.mean = "mean", column.sd = "sd",
-  seed = NULL
-)
-{
-  result <- data.frame(matrix(ncol = nrow(x), nrow = runs))
-  
-  if (set.names) {
-    colnames(result) <- x$VariableName
-  }
-  
-  if (! is.null(seed)) {
-    set.seed(seed)
-  }
-  
-  FUN.norm <- ifelse(log, rlnorm, rnorm)
-  
-  for (row in seq_len(ncol(result))) {
-    result[[row]] <- FUN.norm(runs, x[row, column.mean], x[row, column.sd])
-  }
-  
-  result
-}
-
-# initMonteCarlo2 --------------------------------------------------------------
-initMonteCarlo2 <- function
 (
   x, runs, log = TRUE, set.names = TRUE, column.mean = "mean", column.sd = "sd", 
   seed = NULL
@@ -368,6 +317,31 @@ changeunit <- function(x, factors = CONVERSION_FACTORS)
   x[, columns] <- x[, columns] * factors[unit]
   
   x
+}
+
+# sumPaths ---------------------------------------------------------------------
+sumPaths <- function(suwNames, variables, runs, inputs)
+{
+  out.init <- data.frame(matrix(ncol = length(suwNames), nrow = runs))
+  colnames(out.init) <- suwNames
+  
+  result <- lapply(seq_along(variables), function(i) {
+    
+    out <- out.init
+    
+    for (j in seq_along(suwNames)) {
+      
+      # Get the appropriate column vectors from the input lists
+      vectors <- lapply(inputs, function(input) input[[i]][, 1 + j])
+      
+      # Calculate the sum vector and assign it to out[, j]
+      out[, j] <- Reduce("+", vectors)
+    }
+    
+    out
+  })
+  
+  structure(result, names = variables)
 }
 
 # annual_load_sewage ----------------------------------------------------------- 
