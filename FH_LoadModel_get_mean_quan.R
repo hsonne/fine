@@ -186,16 +186,16 @@ if (FALSE)
 meanQuantiles <- function(offset, suwNames, variables, loads)
 {
   result <- list()
+
+  subresult.0 <- data.frame(matrix(ncol = (1 + length(suwNames)), nrow = 3))
+  subresult.0[, 1] <- c("mean", "Quan 5", "Quan 95")
+  colnames(subresult.0) <- c("Value", suwNames)
   
   for (a in seq_along(variables)) {
     
-    subresult <- data.frame(matrix(ncol = (1 + length(suwNames)), nrow = 3))
+    subresult <- subresult.0
     
-    subresult[, 1] <- c("mean", "Quan 5", "Quan 95")
-
     for (b in seq_along(suwNames)) {
-      
-      colnames(subresult) <- c("Value", suwNames)
 
       subresult[1:3, 1 + b] <- getStats(x = loads[[a]][, offset + b])
     }
