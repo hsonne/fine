@@ -149,20 +149,7 @@ if (FALSE)
   colnames(quan95_SUWt) <- quan95_SUWt[1, ]
 
   # one data frame for mean and quantiles of rain volumes
-  
-  vol_rain_TOT <- data.frame(matrix(
-    ncol = 1 + length(SUW_Names_rain), nrow = 3
-  ))
-  
-  colnames(vol_rain_TOT) <- c("Values", SUW_Names_rain)
-  vol_rain_TOT[, 1] <- c("mean", "Quan 5", "Quan 95")
-  
-  for (column in SUW_Names_rain){
-    
-    vol_rain_TOT[1, column] <- mean_SUWt[2, column]
-    vol_rain_TOT[2, column] <- quan5_SUWt[2, column]
-    vol_rain_TOT[3, column] <- quan95_SUWt[2, column]
-  }
+  vol_rain_TOT <- toOverview(SUW_Names_rain, mean_SUWt, quant5_SUWt, quan95_SUWt)
   
   ## sewage volumes
   
@@ -208,20 +195,7 @@ if (FALSE)
   colnames(quan95_SUWt) <- quan95_SUWt[1, ]
   
   # one data frame for mean and quantiles of sewage volumes
-  
-  vol_sew_TOT <- data.frame(matrix(
-    ncol = 1 + length(SUW_Names_sew), nrow = 3
-  ))
-  
-  colnames(vol_sew_TOT) <- c("Values", SUW_Names_sew)
-  vol_sew_TOT[, 1] <- c("mean", "Quan 5", "Quan 95")
-  
-  for (column in SUW_Names_sew){
-    
-    vol_sew_TOT[1, column] <- mean_SUWt[2, column]
-    vol_sew_TOT[2, column] <- quan5_SUWt[2, column]
-    vol_sew_TOT[3, column] <- quan95_SUWt[2, column]
-  }
+  vol_sew_TOT <- toOverview(SUW_Names_sew, mean_SUWt, quan5_SUWt, quan95_SUWt)
   
   ## get OgRe-dataframe-structure for plotting----------------------------------
   
@@ -377,28 +351,44 @@ combineLoads <- function(variables, x, y)
 # loads: loads in rainwater or sewage
 meanQuantiles <- function(offset, suwNames, variables, loads)
 {
-  mylist <- list()
+  result <- list()
   
   for (a in seq_along(variables)) {
     
-    mylist[[a]] <- data.frame(matrix(
-      ncol = (1 + length(suwNames)), nrow = 3
-    ))
+    result[[a]] <- data.frame(matrix(ncol = (1 + length(suwNames)), nrow = 3))
     
-    mylist[[a]][, 1] <- c("mean", "Quan 5", "Quan 95")
-    names(mylist)[a] <- variables[a]
+    result[[a]][, 1] <- c("mean", "Quan 5", "Quan 95")
+    names(result)[a] <- variables[a]
     
     for (b in seq_along(suwNames)) {
       
-      colnames(mylist[[a]]) <- c("Value", suwNames)
+      colnames(result[[a]]) <- c("Value", suwNames)
       
       x <- loads[[a]][, offset + b]
       
-      mylist[[a]][1, 1 + b] <- mean(x)
-      mylist[[a]][2, 1 + b] <- quantile(x, probs = 0.05)
-      mylist[[a]][3, 1 + b] <- quantile(x, probs = 0.95) 
+      result[[a]][1, 1 + b] <- mean(x)
+      result[[a]][2, 1 + b] <- quantile(x, probs = 0.05)
+      result[[a]][3, 1 + b] <- quantile(x, probs = 0.95) 
     }
   }
   
-  mylist
+  result
+}
+
+# toOverview -------------------------------------------------------------------
+toOverview <- function(suwNames, means, quantiles5, quantiles95)
+{
+  result <- data.frame(matrix(ncol = 1 + length(suwNames), nrow = 3))
+
+  colnames(result) <- c("Values", suwNames)
+  result[, 1] <- c("mean", "Quan 5", "Quan 95")
+  
+  for (column in suwNames) {
+    
+    result[1, column] <- means[2, column]
+    result[2, column] <- quantiles5[2, column]
+    result[3, column] <- quantiles95[2, column]
+  }
+  
+  result
 }
