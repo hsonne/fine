@@ -276,23 +276,20 @@ getLoads <- function
   removal = NULL
 )
 {
-  SUW_Names <- unique(volume$SUW)
+  suwNames <- unique(volume$SUW)
   
   # Filter volume data frame for the given parameter
   volume <- volume[volume$Parameter == parameter, ]
   
   # calculate loads in list
-  load_x <- lapply(seq_len(ncol(concentration)), function(e) {
+  load_x <- lapply(seq_len(ncol(concentration)), function(i) {
     
     # Initialise the output data frame with a unit column
-    out <- data.frame(unit = rep(units[e], times = nrow(concentration)))
+    out <- data.frame(unit = rep(units[i], times = nrow(concentration)))
 
-    # get volume for each SUW
-    for (f in seq_along(SUW_Names)) {
+    # Get the loads for each SUW
+    for (suwName in suwNames) {
 
-      # Provide the name of the current SUW
-      suwName <- SUW_Names[f]
-      
       # From the volume data frame, already filtered for the given parameter,
       # select the row representing the current SUW name. 
       volume_suw <- volume[volume$SUW == suwName, ]
@@ -304,10 +301,10 @@ getLoads <- function
       for (run in seq_len(runs)) {
         
         # Skip the first 2 columns, SUW and Parameter, in volume_suw: 2 + run
-        load <- concentration[run, e] * volume_suw[, 2 + run]
+        load <- concentration[run, i] * volume_suw[, 2 + run]
         
         # Lookup the removal rate or set it to 0 if no removals are given
-        removalRate <- if (is.null(removal)) 0 else 0.01 * removal[run, e]
+        removalRate <- if (is.null(removal)) 0 else 0.01 * removal[run, i]
         
         out[run, suwName] <- load * (1 - removalRate)
       }
