@@ -276,6 +276,11 @@ getLoads <- function
   removal = NULL
 )
 {
+  SUW_Names <- unique(volume$SUW)
+  
+  # Filter volume data frame for the given parameter
+  volume <- volume[volume$Parameter == parameter, ]
+  
   # calculate loads in list
   load_x <- list()
   
@@ -284,22 +289,20 @@ getLoads <- function
     load_x[[e]] <- data.frame(unit = rep(units[e], times = nrow(concentration)))
     
     names(load_x)[e] <- colnames(concentration)[e]
-    
+
     # get volume for each SUW
-    SUW_Names <- unique(volume$SUW)
-    
     for (f in seq_along(SUW_Names)) {
       
-      indices <- which(volume$SUW == SUW_Names[f])
-      vol_x_SUW <- volume[indices, ]
-      
+      # From the volume data frame, already filtered for the given parameter,
+      # select the row representing the current SUW name. 
+      volume_suw <- volume[volume$SUW == SUW_Names[f], ]
+
       load_x[[e]][[1 + f]] <- NA
       
       for (run in seq_len(runs)) {
         
-        condition <- vol_x_SUW$Parameter == parameter
-        
-        load <- concentration[run, e] * vol_x_SUW[condition, 2 + run]
+        # Skip the first 2 columns, SUW and Parameter, in volume_suw: 2 + run
+        load <- concentration[run, e] * volume_suw[, 2 + run]
         
         if (! is.null(removal)) {
           load <- load * (1 - removal[run, e] / 100)
