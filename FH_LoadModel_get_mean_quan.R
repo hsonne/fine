@@ -303,30 +303,41 @@ if (FALSE)
   }
   
   ## for total loads
+  loads_TOT_mean_quan <- summarise_loads(
+    suwNames = SUW_Names_rain, 
+    variables = x_conc_NEU$VariableName,
+    totals = load_TOT_mean_quan
+  )
+}
+
+### FUNCTIONS ###
+
+# summarise_loads --------------------------------------------------------------
+summarise_loads <- function(suwNames, variables, totals) 
+{
+  result <- list()
   
-  loads_TOT_mean_quan <- list()
-  
-  for (e in seq_along(SUW_Names_rain)) {
+  for (i in seq_along(suwNames)) {
     
-    loads_TOT_mean_quan[[e]] <- data.frame(
-      VariableName = x_conc_NEU$VariableName,
+    x <- data.frame(
+      VariableName = variables,
       TOT_mean = 0, 
       TOT_5 = 0, 
       TOT_95 = 0
     )
     
-    names(loads_TOT_mean_quan)[e] <- SUW_Names_rain[e]
-    
-    for (f in seq_along(variables)) {
+    for (row in seq_along(variables)) {
       
-      loads_TOT_mean_quan[[e]][f, 2] <- load_TOT_mean_quan[[f]][1, 1 + e]
-      loads_TOT_mean_quan[[e]][f, 3] <- load_TOT_mean_quan[[f]][2, 1 + e]
-      loads_TOT_mean_quan[[e]][f, 4] <- load_TOT_mean_quan[[f]][3, 1 + e]
+      x[row, 2] <- totals[[row]][1, 1 + i]
+      x[row, 3] <- totals[[row]][2, 1 + i]
+      x[row, 4] <- totals[[row]][3, 1 + i]
     }
+    
+    result[[suwNames[i]]] <- x
   }
+  
+  result
 }
-
-### FUNCTIONS ###
 
 # combineLoads -----------------------------------------------------------------
 combineLoads <- function(variables, x, y)
