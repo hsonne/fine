@@ -190,21 +190,23 @@ meanQuantiles <- function(offset, suwNames, variables, loads)
   
   for (a in seq_along(variables)) {
     
-    result[[a]] <- data.frame(matrix(ncol = (1 + length(suwNames)), nrow = 3))
+    subresult <- data.frame(matrix(ncol = (1 + length(suwNames)), nrow = 3))
     
-    result[[a]][, 1] <- c("mean", "Quan 5", "Quan 95")
+    subresult[, 1] <- c("mean", "Quan 5", "Quan 95")
     names(result)[a] <- variables[a]
     
     for (b in seq_along(suwNames)) {
       
-      colnames(result[[a]]) <- c("Value", suwNames)
+      colnames(subresult) <- c("Value", suwNames)
       
       x <- loads[[a]][, offset + b]
       
-      result[[a]][1, 1 + b] <- mean(x)
-      result[[a]][2, 1 + b] <- quantile(x, probs = 0.05)
-      result[[a]][3, 1 + b] <- quantile(x, probs = 0.95) 
+      subresult[1, 1 + b] <- mean(x)
+      subresult[2, 1 + b] <- quantile(x, probs = 0.05)
+      subresult[3, 1 + b] <- quantile(x, probs = 0.95) 
     }
+    
+    result[[a]] <- subresult
   }
   
   result
