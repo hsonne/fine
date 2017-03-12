@@ -93,9 +93,8 @@ annual_load_rain <- function # calculates the load for each substance
     x = vol_rain, runs = runs, log = FALSE, set.names = FALSE, seed = 3
   )
   
-  MC_vol_rain_t <- t(MC_vol_rain_1)
   MC_vol_rain_1 <- vol_rain[, 1:2]
-  MC_vol_rain <- cbind(MC_vol_rain_1, MC_vol_rain_t)
+  MC_vol_rain <- cbind(MC_vol_rain_1, t(MC_vol_rain_1))
 
   # Provide units
   units <- selectColumns(x_conc_NEU, "UnitsAbbreviation")
@@ -398,9 +397,8 @@ annual_load_sewage <- function # calculates the load for each substance
     x = vol_sewage, runs = runs, log = FALSE, set.names = FALSE, seed = 2
   )
 
-  MC_vol_sew_t <- t(MC_vol_sew)
   MC_vol_sew <- vol_sewage[, 1:2]
-  MC_vol_sewage <- cbind(MC_vol_sew, MC_vol_sew_t)
+  MC_vol_sewage <- cbind(MC_vol_sew, t(MC_vol_sew))
   
   # Step 2: Monte Carlo simulations to get removal rates, concentrations of 
   # influent/effluent WWTP
