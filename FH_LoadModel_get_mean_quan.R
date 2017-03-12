@@ -208,7 +208,7 @@ meanQuantiles <- function(offset, suwNames, variables, loads)
 initStats <- function(suwNames, stats = c("mean", "Quan 5", "Quan 95"), 
                       column.stats = "Value")
 {
-  columns <- c("Value", suwNames)
+  columns <- c(column.stats, suwNames)
   
   result <- data.frame(matrix(ncol = length(columns), nrow = length(stats)))
   
