@@ -201,9 +201,9 @@ meanQuantiles <- function(offset, suwNames, variables, loads)
       
       x <- loads[[a]][, offset + b]
       
-      subresult[1, 1 + b] <- mean(x)
-      subresult[2, 1 + b] <- quantile(x, probs = 0.05)
-      subresult[3, 1 + b] <- quantile(x, probs = 0.95) 
+      subresult[1:3, 1 + b] <- c(
+        mean(x), quantile(x, probs = 0.05), quantile(x, probs = 0.95)
+      )
     }
     
     result[[a]] <- subresult
@@ -242,9 +242,11 @@ getMeanAndQuantiles <- function(x, monteCarlo, suwNames, multiple)
 
     values <- monteCarlo[, i]
       
-    result[i, 3] <- mean(values)
-    result[i, 4] <- quantile(values, probs = 0.05)
-    result[i, 5] <- quantile(values, probs = 0.95)
+    result[i, 3:5] <- c(
+      mean(values), 
+      quantile(values, probs = 0.05), 
+      quantile(values, probs = 0.95)
+    )
   }
   
   result
