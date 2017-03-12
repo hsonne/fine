@@ -79,9 +79,9 @@ if (FALSE)
   # Define function arguments for combineLoads
   args2 <- list(
     
-    cso  = list(variables, load_rain_cso, load_sew_cso),
-    wwtp = list(variables, load_rain_wwtp, load_sew_wwtp),
-    tot  = list(variables, load_rain_sum, load_sew_sum)
+    cso  = list(variables, SUW_Names_sew, load_rain_cso, load_sew_cso),
+    wwtp = list(variables, SUW_Names_sew, load_rain_wwtp, load_sew_wwtp),
+    tot  = list(variables, SUW_Names_sew, load_rain_sum, load_sew_sum)
   )
   
   ## combine loads rainwater and sewage, load_rain_wwtp + load_sew_wwtp,
@@ -224,14 +224,14 @@ getStats <- function(x)
 }
 
 # combineLoads -----------------------------------------------------------------
-combineLoads <- function(variables, x, y)
+combineLoads <- function(variables, suwNames, x, y)
 {
   result <- lapply(seq_along(variables), function(i) {
     
     xi <- x[[i]]
     yi <- y[[i]]
     
-    for (column in SUW_Names_sew) {
+    for (column in suwNames) {
       xi[, column] <- xi[, column] + yi[, column]
     }
     
