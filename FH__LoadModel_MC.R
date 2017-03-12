@@ -313,7 +313,7 @@ getLoads <- function
     changeunit(out)
   })
   
-  structure(load_x, names <- colnames(concentration))
+  structure(load_x, names = colnames(concentration))
 }
 
 # changeunit--------------------------------------------------------------------
