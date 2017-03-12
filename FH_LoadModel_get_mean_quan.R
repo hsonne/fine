@@ -187,13 +187,13 @@ meanQuantiles <- function(offset, suwNames, variables, loads)
 {
   emptyStats <- initStats(suwNames)
   
-  result <- lapply(seq_along(variables), function(i) {
+  result <- lapply(loads, function(load) {
     
     subresult <- emptyStats
     
     for (j in seq_along(suwNames)) {
 
-      subresult[1:3, 1 + j] <- getStats(x = loads[[i]][, offset + j])
+      subresult[1:3, 1 + j] <- getStats(x = load[, offset + j])
     }
     
     subresult
