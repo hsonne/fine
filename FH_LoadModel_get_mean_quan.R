@@ -185,23 +185,21 @@ if (FALSE)
 # meanQuantiles ----------------------------------------------------------------
 meanQuantiles <- function(offset, suwNames, variables, loads)
 {
-  result <- list()
-
   emptyStats <- initStats(suwNames)
   
-  for (a in seq_along(variables)) {
+  result <- lapply(seq_along(variables), function(i) {
     
     subresult <- emptyStats
     
-    for (b in seq_along(suwNames)) {
+    for (j in seq_along(suwNames)) {
 
-      subresult[1:3, 1 + b] <- getStats(x = loads[[a]][, offset + b])
+      subresult[1:3, 1 + j] <- getStats(x = loads[[i]][, offset + j])
     }
     
-    result[[variables[a]]] <- subresult
-  }
+    subresult
+  })
   
-  result
+  structure(result, names = variables) 
 }
 
 # initStats --------------------------------------------------------------------
