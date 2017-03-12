@@ -38,15 +38,17 @@ paths_sew <- c("CSO", "WWTP", "TOT")
 if (FALSE)
 {
   # Provide loads from list "x_annual_loads_rain"
-  load_rain_cso      <- x_annual_loads_rain$load_rain_cso
-  load_rain_sep      <- x_annual_loads_rain$load_rain_sep
-  load_rain_wwtp     <- x_annual_loads_rain$load_rain_wwtp
-  load_rain_sum_path <- x_annual_loads_rain$load_rain_sum_paths
+  load_rain_cso  <- x_annual_loads_rain$load_rain_cso
+  load_rain_sep  <- x_annual_loads_rain$load_rain_sep
+  load_rain_wwtp <- x_annual_loads_rain$load_rain_wwtp
+  load_rain_sum  <- x_annual_loads_rain$load_rain_sums
+  MC_vol_rain    <- x_annual_loads_rain$MC_vol_rain
   
   # Provide loads from list "x_annual_loads_sew"
-  load_sew_cso      <- x_annual_loads_sew$load_sew_cso
-  load_sew_wwtp     <- x_annual_loads_sew$load_sew_wwtp
-  load_sew_sum_path <- x_annual_loads_sew$load_sew_sum_paths
+  load_sew_cso  <- x_annual_loads_sew$load_sew_cso
+  load_sew_wwtp <- x_annual_loads_sew$load_sew_wwtp
+  load_sew_sum  <- x_annual_loads_sew$load_sew_sums
+  MC_vol_sewage <- x_annual_loads_sew$MC_vol_sewage
   
   # Define function arguments for meanQuantiles
   args1 <- list(
@@ -54,11 +56,11 @@ if (FALSE)
     rain_cso  = list(offset = 1, SUW_Names_rain, variables, load_rain_cso),
     rain_sep  = list(offset = 1, SUW_Names_rain, variables, load_rain_sep),
     rain_wwtp = list(offset = 1, SUW_Names_rain, variables, load_rain_wwtp),
-    rain_sum  = list(offset = 0, SUW_Names_rain, variables, load_rain_sum_path),
+    rain_sum  = list(offset = 0, SUW_Names_rain, variables, load_rain_sum),
     
     sew_cso  = list(offset = 1, SUW_Names_sew, variables, load_sew_cso),
     sew_wwtp = list(offset = 1, SUW_Names_sew, variables, load_sew_wwtp),
-    sew_sum  = list(offset = 0, SUW_Names_sew, variables, load_sew_sum_path)
+    sew_sum  = list(offset = 0, SUW_Names_sew, variables, load_sew_sum)
   )
   
   ## get mean and quantiles for loads in rainwater and all pathways
@@ -70,16 +72,16 @@ if (FALSE)
   load_sew_cso_mean_quan  <- do.call(meanQuantiles, args1$sew_cso)
   load_sew_wwtp_mean_quan <- do.call(meanQuantiles, args1$sew_wwtp)
   
-  ## get mean and quantiles for load_rain_sum_path, load_sew_sum_path
-  load_rain_sum_path_mean_quan <- do.call(meanQuantiles, args1$rain_sum)
-  load_sew_sum_path_mean_quan  <- do.call(meanQuantiles, args1$sew_sum)
+  ## get mean and quantiles for load_rain_sum, load_sew_sum
+  load_rain_sum_mean_quan <- do.call(meanQuantiles, args1$rain_sum)
+  load_sew_sum_mean_quan  <- do.call(meanQuantiles, args1$sew_sum)
   
   # Define function arguments for combineLoads
   args2 <- list(
     
     cso  = list(variables, load_rain_cso, load_sew_cso),
     wwtp = list(variables, load_rain_wwtp, load_sew_wwtp),
-    tot  = list(variables, load_rain_sum_path, load_sew_sum_path)
+    tot  = list(variables, load_rain_sum, load_sew_sum)
   )
   
   ## combine loads rainwater and sewage, load_rain_wwtp + load_sew_wwtp,
@@ -108,31 +110,25 @@ if (FALSE)
   ## rainwater volumes
   vol_rain_mean_quan <- getMeanAndQuantiles(
     x = vol_rain, 
-    monteCarlo = t(x_annual_loads_rain$MC_vol_rain[, -(1:2)]), 
+    monteCarlo = t(MC_vol_rain[, -(1:2)]), 
     suwNames = SUW_Names_rain,
     multiple = 3
   )
 
   # mean and quantiles for total rain volumes by SUW
-  vol_rain_TOT <- toTotal(
-    x = x_annual_loads_rain$MC_vol_rain, 
-    suwNames = SUW_Names_rain
-  )
+  vol_rain_TOT <- toTotal(x = MC_vol_rain, suwNames = SUW_Names_rain)
 
   ## sewage volumes
   vol_sewage_mean_quan <- getMeanAndQuantiles(
     x = vol_sewage[, 1:2], 
-    monteCarlo = t(x_annual_loads_sew$MC_vol_sewage[, -(1:2)]), 
+    monteCarlo = t(MC_vol_sewage[, -(1:2)]), 
     suwNames = SUW_Names_sew, 
     multiple = 2
   )
   
   # mean and quantiles for total volume of sewage by SUW
   # one data frame for mean and quantiles of sewage volumes
-  vol_sew_TOT <- toTotal(
-    x = x_annual_loads_sew$MC_vol_sewage,
-    suwNames = SUW_Names_sew
-  )
+  vol_sew_TOT <- toTotal(x = MC_vol_sewage, suwNames = SUW_Names_sew)
   
   ## get OgRe-dataframe-structure for plotting----------------------------------
   
@@ -143,7 +139,7 @@ if (FALSE)
     suwNames = SUW_Names_rain,
     inputs = list(
       SEP = load_rain_sep_mean_quan, CSO = load_rain_cso_mean_quan,
-      WWTP = load_rain_wwtp_mean_quan, TOT = load_rain_sum_path_mean_quan
+      WWTP = load_rain_wwtp_mean_quan, TOT = load_rain_sum_mean_quan
     ),
     columns = c(
       "SEP_mean", "SEP_5", "SEP_95", "CSO_mean", "CSO_5", "CSO_95",
@@ -159,7 +155,7 @@ if (FALSE)
     variables = variables,
     inputs = list(
       CSO = load_sew_cso_mean_quan, WWTP = load_sew_wwtp_mean_quan, 
-      TOT = load_sew_sum_path_mean_quan
+      TOT = load_sew_sum_mean_quan
     ),
     columns = c(
       "CSO_mean", "CSO_5", "CSO_95", "WWTP_mean", "WWTP_5", "WWTP_95",
