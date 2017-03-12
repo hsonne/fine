@@ -197,18 +197,20 @@ meanQuantiles <- function(offset, suwNames, variables, loads)
     for (b in seq_along(suwNames)) {
       
       colnames(subresult) <- c("Value", suwNames)
-      
-      x <- loads[[a]][, offset + b]
-      
-      subresult[1:3, 1 + b] <- c(
-        mean(x), quantile(x, probs = 0.05), quantile(x, probs = 0.95)
-      )
+
+      subresult[1:3, 1 + b] <- getStats(x = loads[[a]][, offset + b])
     }
     
     result[[a]] <- subresult
   }
   
   result
+}
+
+# getStats ---------------------------------------------------------------------
+getStats <- function(x)
+{
+  c(mean(x), quantile(x, probs = 0.05), quantile(x, probs = 0.95))
 }
 
 # combineLoads -----------------------------------------------------------------
@@ -239,13 +241,7 @@ getMeanAndQuantiles <- function(x, monteCarlo, suwNames, multiple)
 
   for (i in seq_len(multiple * length(suwNames))) {
 
-    values <- monteCarlo[, i]
-      
-    result[i, 3:5] <- c(
-      mean(values), 
-      quantile(values, probs = 0.05), 
-      quantile(values, probs = 0.95)
-    )
+    result[i, 3:5] <- getStats(x = monteCarlo[, i])
   }
   
   result
