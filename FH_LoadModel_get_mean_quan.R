@@ -122,7 +122,6 @@ if (FALSE)
   }
   
   # mean and quantiles for total rain volumes by SUW
-  
   MC_vol_rain <- x_annual_loads_rain$MC_vol_rain
   
   vol_rain_list <- hsMatrixToListForm(
@@ -131,25 +130,16 @@ if (FALSE)
     colNamePar = "run", 
     colNameVal = "volume"
   )
-  
-  sum_SUW <- aggregate(volume ~ SUW + run, data = vol_rain_list, FUN = sum)
-  
-  mean_SUW  <- aggregate(volume ~ SUW, data = sum_SUW, FUN = mean)
-  mean_SUWt <- t(mean_SUW)
-  colnames(mean_SUWt) <- mean_SUWt[1, ]
 
-  quan5_SUW <- aggregate(volume ~ SUW, data = sum_SUW, FUN = quantile, 
-                         probs = 0.05)
-  quan5_SUWt <- t(quan5_SUW)
-  colnames(quan5_SUWt) <- quan5_SUWt[1, ]
-  
-  quan95_SUW <- aggregate(volume ~ SUW, data = sum_SUW, FUN = quantile, 
-                          probs = 0.95)
-  quan95_SUWt <- t(quan95_SUW)
-  colnames(quan95_SUWt) <- quan95_SUWt[1, ]
+  sum_SUW <- aggregate(volume ~ SUW + run, data = vol_rain_list, FUN = sum)
 
   # one data frame for mean and quantiles of rain volumes
-  vol_rain_TOT <- toOverview(SUW_Names_rain, mean_SUWt, quant5_SUWt, quan95_SUWt)
+  vol_rain_TOT <- toOverview(
+    suwNames = SUW_Names_rain, 
+    means = aggregateBySUW(sum_SUW, mean), 
+    quantiles5 = aggregateBySUW(sum_SUW, quantile, probs = 0.05), 
+    quantiles95 = aggregateBySUW(sum_SUW, quantile, probs = 0.95)
+  )
   
   ## sewage volumes
   
@@ -179,23 +169,14 @@ if (FALSE)
   )
   
   sum_SUW <- aggregate(volume ~ SUW + run, data = vol_sew_list, FUN = sum)
-  
-  mean_SUW  <- aggregate(volume ~ SUW, data = sum_SUW, FUN = mean)
-  mean_SUWt <- t(mean_SUW)
-  colnames(mean_SUWt) <- mean_SUWt[1, ]
-  
-  quan5_SUW <- aggregate(volume ~ SUW, data = sum_SUW, FUN = quantile, 
-                         probs = 0.05)
-  quan5_SUWt <- t(quan5_SUW)
-  colnames(quan5_SUWt) <- quan5_SUWt[1, ]
-  
-  quan95_SUW <- aggregate(volume ~ SUW, data = sum_SUW, FUN = quantile, 
-                          probs = 0.95)
-  quan95_SUWt <- t(quan95_SUW)
-  colnames(quan95_SUWt) <- quan95_SUWt[1, ]
-  
+
   # one data frame for mean and quantiles of sewage volumes
-  vol_sew_TOT <- toOverview(SUW_Names_sew, mean_SUWt, quan5_SUWt, quan95_SUWt)
+  vol_sew_TOT <- toOverview(
+    suwNames = SUW_Names_sew, 
+    means = aggregateBySUW(sum_SUW, mean), 
+    quantiles5 = aggregateBySUW(sum_SUW, quantile, probs = 0.05), 
+    quantiles95 = aggregateBySUW(sum_SUW, quantile, probs = 0.95)
+  )
   
   ## get OgRe-dataframe-structure for plotting----------------------------------
   
@@ -248,6 +229,14 @@ if (FALSE)
 }
 
 ### FUNCTIONS ###
+
+# aggregateBySUW ---------------------------------------------------------------
+aggregateBySUW <- function(data, FUN, ...) 
+{
+  result <- t(aggregate(volume ~ SUW, data = data, FUN = FUN, ...))
+  colnames(result) <- result[1, ]
+  result
+}
 
 # summarise_loads --------------------------------------------------------------
 summarise_loads <- function(suwNames, variables, inputs, columns) 
