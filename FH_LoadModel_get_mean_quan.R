@@ -34,7 +34,7 @@ SUW_Names_sew <- unique(selectColumns(vol_sewage, "SUW"))
 paths_rain <- c("SEP", "CSO", "WWTP", "TOT")
 paths_sew <- c("CSO", "WWTP", "TOT")
 
-# MAIN
+# MAIN -------------------------------------------------------------------------
 if (FALSE)
 {
   # Provide loads from list "x_annual_loads_rain"
@@ -130,7 +130,7 @@ if (FALSE)
   # one data frame for mean and quantiles of sewage volumes
   vol_sew_TOT <- toTotal(x = MC_vol_sewage, suwNames = SUW_Names_sew)
   
-  ## get OgRe-dataframe-structure for plotting----------------------------------
+  ## get OgRe-dataframe-structure for plotting
   
   ## for loads in rainwater
   # by path
@@ -183,7 +183,6 @@ if (FALSE)
 ### FUNCTIONS ###
 
 # meanQuantiles ----------------------------------------------------------------
-# loads: loads in rainwater or sewage
 meanQuantiles <- function(offset, suwNames, variables, loads)
 {
   result <- list()
