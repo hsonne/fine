@@ -202,141 +202,93 @@ if (FALSE)
   ## for loads in rainwater
   # by path
   
-  loads_rain_by_path_mean_quan <- list()
-  
-  for (e in seq_along(SUW_Names_rain)) {
-    
-    loads_rain_by_path_mean_quan[[e]] <- data.frame(
-      VariableName = x_conc_NEU$VariableName,
-      SEP_mean = 0, 
-      SEP_5 = 0, 
-      SEP_95 = 0, 
-      CSO_mean = 0, 
-      CSO_5 = 0, 
-      CSO_95 = 0,
-      WWTP_mean = 0, 
-      WWTP_5 = 0, 
-      WWTP_95 = 0, 
-      TOT_mean = 0, 
-      TOT_5 = 0, 
-      TOT_95 = 0
+  loads_rain_by_path_mean_quan <- summarise_loads(
+    suwNames = SUW_Names_rain,
+    inputs = list(
+      SEP = load_rain_sep_mean_quan, CSO = load_rain_cso_mean_quan,
+      WWTP = load_rain_wwtp_mean_quan, TOT = load_rain_sum_path_mean_quan
+    ),
+    columns = c(
+      "SEP_mean", "SEP_5", "SEP_95", "CSO_mean", "CSO_5", "CSO_95",
+      "WWTP_mean", "WWTP_5", "WWTP_95", "TOT_mean", "TOT_5", "TOT_95"
     )
-    
-    names(loads_rain_by_path_mean_quan)[e] <- SUW_Names_rain[e]
-    
-    for (f in seq_along(variables)) {
-      
-      loads_rain_by_path_mean_quan[[e]][f, 2] <- load_rain_sep_mean_quan[[f]][1, 1 + e]
-      loads_rain_by_path_mean_quan[[e]][f, 3] <- load_rain_sep_mean_quan[[f]][2, 1 + e]
-      loads_rain_by_path_mean_quan[[e]][f, 4] <- load_rain_sep_mean_quan[[f]][3, 1 + e]
-      loads_rain_by_path_mean_quan[[e]][f, 5] <- load_rain_cso_mean_quan[[f]][1, 1 + e]
-      loads_rain_by_path_mean_quan[[e]][f, 6] <- load_rain_cso_mean_quan[[f]][2, 1 + e]
-      loads_rain_by_path_mean_quan[[e]][f, 7] <- load_rain_cso_mean_quan[[f]][3, 1 + e]
-      loads_rain_by_path_mean_quan[[e]][f, 8] <- load_rain_wwtp_mean_quan[[f]][1, 1 + e]
-      loads_rain_by_path_mean_quan[[e]][f, 9] <- load_rain_wwtp_mean_quan[[f]][2, 1 + e]
-      loads_rain_by_path_mean_quan[[e]][f, 10] <- load_rain_wwtp_mean_quan [[f]][3, 1 + e]
-      loads_rain_by_path_mean_quan[[e]][f, 11] <- load_rain_sum_path_mean_quan[[f]][1, 1 + e]
-      loads_rain_by_path_mean_quan[[e]][f, 12] <- load_rain_sum_path_mean_quan[[f]][2, 1 + e]
-      loads_rain_by_path_mean_quan[[e]][f, 13] <- load_rain_sum_path_mean_quan[[f]][3, 1 + e]
-    }
-  }
-  
+  )
+
   ## for loads in sewage
   # by path
   
-  loads_sew_by_path_mean_quan <- list()
-  
-  for (e in seq_along(SUW_Names_sew))
-  {
-    loads_sew_by_path_mean_quan[[e]] <- data.frame(
-      VariableName = x_conc_NEU$VariableName,
-      CSO_mean = 0, 
-      CSO_5 = 0, 
-      CSO_95 = 0, 
-      WWTP_mean = 0, 
-      WWTP_5 = 0, 
-      WWTP_95 = 0,
-      TOT_mean = 0, 
-      TOT_5 = 0, 
-      TOT_95 = 0
+  loads_sew_by_path_mean_quan <- summarise_loads(
+    suwNames = SUW_Names_sew,
+    variables = variables,
+    inputs = list(
+      CSO = load_sew_cso_mean_quan, WWTP = load_sew_wwtp_mean_quan, 
+      TOT = load_sew_sum_path_mean_quan
+    ),
+    columns = c(
+      "CSO_mean", "CSO_5", "CSO_95", "WWTP_mean", "WWTP_5", "WWTP_95",
+      "TOT_mean", "TOT_5", "TOT_95"
     )
-    
-    names(loads_sew_by_path_mean_quan)[e] <- SUW_Names_sew[e]
-    
-    for (f in seq_along(variables)) {
-      
-      loads_sew_by_path_mean_quan[[e]][f, 2] <- load_sew_cso_mean_quan[[f]][1, 1 + e]
-      loads_sew_by_path_mean_quan[[e]][f, 3] <- load_sew_cso_mean_quan[[f]][2, 1 + e]
-      loads_sew_by_path_mean_quan[[e]][f, 4] <- load_sew_cso_mean_quan[[f]][3, 1 + e]
-      loads_sew_by_path_mean_quan[[e]][f, 5] <- load_sew_wwtp_mean_quan[[f]][1, 1 + e]
-      loads_sew_by_path_mean_quan[[e]][f, 6] <- load_sew_wwtp_mean_quan[[f]][2, 1 + e]
-      loads_sew_by_path_mean_quan[[e]][f, 7] <- load_sew_wwtp_mean_quan[[f]][3, 1 + e]
-      loads_sew_by_path_mean_quan[[e]][f, 8] <- load_sew_sum_path_mean_quan[[f]][1, 1 + e]
-      loads_sew_by_path_mean_quan[[e]][f, 9] <- load_sew_sum_path_mean_quan[[f]][2, 1 + e]
-      loads_sew_by_path_mean_quan[[e]][f, 10] <- load_sew_sum_path_mean_quan[[f]][3, 1 + e]
-    }
-  }
+  )
   
   ## for summary of loads via CSO and WWTP
-  
-  loads_cso_wwtp_quan <- list()
-  
-  for (e in seq_along(SUW_Names_rain)) {
-    
-    loads_cso_wwtp_quan[[e]] <- data.frame(
-      VariableName = x_conc_NEU$VariableName,
-      CSO_5 = 0, 
-      CSO_95 = 0, 
-      WWTP_5 = 0, 
-      WWTP_95 = 0
-    )
-    
-    names(loads_cso_wwtp_quan)[e] <- SUW_Names_rain[e]
-    
-    for (f in seq_along(variables)) {
-      
-      loads_cso_wwtp_quan[[e]][f, 2] <- load_cso_mean_quan[[f]][2, 1 + e]
-      loads_cso_wwtp_quan[[e]][f, 3] <- load_cso_mean_quan[[f]][3, 1 + e]
-      loads_cso_wwtp_quan[[e]][f, 4] <- load_wwtp_mean_quan[[f]][2, 1 + e]
-      loads_cso_wwtp_quan[[e]][f, 5] <- load_wwtp_mean_quan[[f]][3, 1 + e]
-    }
-  }
-  
+  loads_cso_wwtp_quan <- summarise_loads(
+    suwNames = SUW_Names_rain,
+    variables = variables,
+    inputs = list(CSO = load_cso_mean_quan, WWTP = load_wwtp_mean_quan),
+    columns = c("CSO_5", "CSO_95", "WWTP_5", "WWTP_95")
+  )
+
   ## for total loads
   loads_TOT_mean_quan <- summarise_loads(
     suwNames = SUW_Names_rain, 
-    variables = x_conc_NEU$VariableName,
-    totals = load_TOT_mean_quan
+    variables = variables,
+    inputs = list(TOT = load_TOT_mean_quan),
+    columns = c("TOT_mean", "TOT_5", "TOT_95")
   )
 }
 
 ### FUNCTIONS ###
 
 # summarise_loads --------------------------------------------------------------
-summarise_loads <- function(suwNames, variables, totals) 
+summarise_loads <- function(suwNames, variables, inputs, columns) 
 {
-  result <- list()
+  # Initialise a data frame with one column: VariableName
+  x.init <- data.frame(VariableName = variables)
   
-  for (i in seq_along(suwNames)) {
+  # Add columns filled with zeroes by calling cbind with do.call
+  args <- as.list(rep(0, length(columns)))
+  x.init <- do.call(cbind, c(list(x.init), structure(args, names = columns)))
+  
+  # Loop through the vector suwNames
+  result <- lapply(seq_along(suwNames), function(i) {
     
-    x <- data.frame(
-      VariableName = variables,
-      TOT_mean = 0, 
-      TOT_5 = 0, 
-      TOT_95 = 0
-    )
+    # Start with the initial data frame
+    x <- x.init
     
-    for (row in seq_along(variables)) {
+    # Loop through the rows of the data frame (corresponding to the variables)
+    for (row.to in seq_len(nrow(x))) {
       
-      x[row, 2] <- totals[[row]][1, 1 + i]
-      x[row, 3] <- totals[[row]][2, 1 + i]
-      x[row, 4] <- totals[[row]][3, 1 + i]
+      # Loop through the column names (excluding the first column)
+      for (column in columns) {
+        
+        # Split the column name at the underscore
+        parts <- strsplit(column, "_")[[1]]
+        
+        # Select the input data frame according to the first part of the column
+        # name and select the row from which to take the value according to the
+        # right part of the column name ("mean" = 1, "5" = 2, "95" = 3)
+        input <- selectElements(inputs, parts[1])
+        row.from <- match(parts[2], c("mean", "5", "95"))
+        
+        # Copy the value from the input data frame to the output data frame
+        x[row.to, column] <- input[[row.to]][row.from, 1 + i]
+      }
     }
     
-    result[[suwNames[i]]] <- x
-  }
+    x
+  })
   
-  result
+  structure(result, names = suwNames)
 }
 
 # combineLoads -----------------------------------------------------------------
