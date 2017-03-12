@@ -141,7 +141,6 @@ annual_load_rain <- function # calculates the load for each substance
   )
   
   # Step 3: Calculation of loads in list, WWTP
-  
   load_rain_wwtp <- getLoads(
     concentration = MC_conc_rain,
     units = units,
@@ -151,29 +150,13 @@ annual_load_rain <- function # calculates the load for each substance
   )
   
   # sum paths (in list)
-  
-  VariableNames <- x_conc_NEU$VariableName
-  SUW_Names_rain <- unique(vol_rain$SUW)
+  load_rain_sum_paths <- sumPaths(
+    suwNames = unique(vol_rain$SUW),
+    variables = colnames(MC_conc_rain),
+    runs = runs,
+    inputs = list(load_rain_cso, load_rain_sep, load_rain_wwtp)
+  )
 
-  columns <- SUW_Names_rain
-  out.init <- data.frame(matrix(ncol = length(columns), nrow = runs))
-  colnames(out.init) <- columns
-  
-  load_rain_sum_paths <- lapply(seq_along(VariableNames), function(i) {
-
-    out <- out.init
-    
-    for (j in seq_along(columns)) {
-      
-      out[j] <- load_rain_cso[[i]][1 + j] + load_rain_sep[[i]][1 + j] + 
-        load_rain_wwtp[[i]][1 + j]
-    }
-       
-    out
-  })
-  
-  names(load_rain_sum_paths) <- colnames(MC_conc_rain)
-  
   # output
   list(
     load_rain_sep = load_rain_sep, 
@@ -182,6 +165,31 @@ annual_load_rain <- function # calculates the load for each substance
     load_rain_sum_paths = load_rain_sum_paths,
     MC_vol_rain = MC_vol_rain
   )
+}
+
+# sumPaths ---------------------------------------------------------------------
+sumPaths <- function(suwNames, variables, runs, inputs)
+{
+  out.init <- data.frame(matrix(ncol = length(suwNames), nrow = runs))
+  colnames(out.init) <- suwNames
+  
+  result <- lapply(seq_along(variables), function(i) {
+    
+    out <- out.init
+    
+    for (j in seq_along(suwNames)) {
+      
+      # Get the appropriate column vectors from the input lists
+      vectors <- lapply(inputs, function(input) input[[i]][, 1 + j])
+      
+      # Calculate the sum vector and assign it to out[, j]
+      out[, j] <- Reduce("+", vectors)
+    }
+    
+    out
+  })
+  
+  structure(result, names = variables)
 }
 
 # readTableOrStop --------------------------------------------------------------
@@ -438,7 +446,6 @@ annual_load_sewage <- function # calculates the load for each substance
   # Step 3: Calculation of loads in list, CSO + WWTP
   
   ## CSO
-  
   load_sew_cso <- getLoads(
     concentration = MC_conc_sew,
     units = units, 
@@ -447,7 +454,6 @@ annual_load_sewage <- function # calculates the load for each substance
   )
   
   ## WWTP
-  
   load_sew_wwtp <- getLoads(
     concentration = MC_conc_sew, 
     units = units,
@@ -457,27 +463,12 @@ annual_load_sewage <- function # calculates the load for each substance
   )
   
   # sum paths (in list)
-  
-  VariableNames <- colnames(MC_conc_sew)
-  SUW_Names_sew = unique(vol_sewage$SUW)
-  
-  columns <- SUW_Names_sew
-  out.init <- data.frame(matrix(ncol = length(columns), nrow = runs))
-  colnames(out.init) <- columns
-  
-  load_sew_sum_paths <- lapply(seq_along(VariableNames), function(i) {
-    
-    out <- out.init
-    
-    for (j in seq_along(columns)) {
-      
-      out[j] <- load_sew_cso[[i]][1 + j] + load_sew_wwtp[[i]][1 + j]
-    }
-    
-    out
-  })
-  
-  names(load_sew_sum_paths) <- colnames(MC_conc_sew)
+  load_sew_sum_paths <- sumPaths(
+    suwNames = unique(vol_sewage$SUW),
+    variables = colnames(MC_conc_sew),
+    runs = runs,
+    inputs = list(load_sew_cso, load_sew_wwtp)
+  )
   
   # output
   list(
