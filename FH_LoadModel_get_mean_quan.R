@@ -109,7 +109,7 @@ if (FALSE)
   ### get mean and quantiles for volumes of rainwater and sewage
   ## rainwater volumes
   vol_rain_mean_quan <- getMeanAndQuantiles(
-    x = vol_rain, 
+    volume = vol_rain, 
     monteCarlo = t(MC_vol_rain[, -(1:2)]), 
     suwNames = SUW_Names_rain,
     multiple = 3
@@ -120,7 +120,7 @@ if (FALSE)
 
   ## sewage volumes
   vol_sewage_mean_quan <- getMeanAndQuantiles(
-    x = vol_sewage[, 1:2], 
+    volume = vol_sewage[, 1:2], 
     monteCarlo = t(MC_vol_sewage[, -(1:2)]), 
     suwNames = SUW_Names_sew, 
     multiple = 2
@@ -245,18 +245,20 @@ combineLoads <- function(variables, x, y)
 }
 
 # getMeanAndQuantiles ----------------------------------------------------------
-getMeanAndQuantiles <- function(x, monteCarlo, suwNames, multiple)
+getMeanAndQuantiles <- function(volume, monteCarlo, suwNames, multiple)
 {
-  result <- x
-  result[, 3:5] <- 0
-  colnames(result)[3:5] <- c("mean", "Quan 5", "Quan 95")
-
+  columns <- c("mean", "Quan 5", "Quan 95")
+  
+  colnames(volume)[2 + seq_along(columns)] <- columns
+  
+  volume[, columns] <- 0
+  
   for (i in seq_len(multiple * length(suwNames))) {
 
-    result[i, 3:5] <- getStats(x = monteCarlo[, i])
+    volume[i, columns] <- getStats(x = monteCarlo[, i])
   }
   
-  result
+  volume
 }
 
 # toTotal ----------------------------------------------------------------------
