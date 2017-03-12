@@ -27,9 +27,8 @@ if (FALSE)
   # 1. calculate loads of rainwater-based substances (for three pathways) 
   
   # proportion of wrong connections in seperate sewer system
-  x <- 0
-  y <- 1 - x
-  
+  prop.wrong <- 0
+
   x_annual_loads_rain <- annual_load_rain(data.dir = data.dir)
   
   # 2. calculate loads of sewage based substances 
@@ -75,13 +74,14 @@ annual_load_rain <- function # calculates the load for each substance
   ### loads of rainwater based substances via separate sewer system and CSO
   
   # Step 1: Monte Carlo simulations to get concentrations in rainwater with 
-  # proportion of wrong connections (x)
+  # proportion of wrong connections (prop.wrong)
   
   MC_conc_rain <- initMonteCarlo(x = x_conc_NEU, runs = runs, seed = 0)
   
   MC_conc_rain_wrongcon <- initMonteCarlo(x = x_conc_BKE, runs = runs, seed = 1)
   
-  MC_conc_rain_sep <- MC_conc_rain * y + x * MC_conc_rain_wrongcon
+  MC_conc_rain_sep <- prop.wrong * MC_conc_rain_wrongcon + 
+    (1 - prop.wrong) * MC_conc_rain
   
   #hist(log10(MC_conc_rain_wrongcon$`Escherichia coli`), breaks = 100)
   
