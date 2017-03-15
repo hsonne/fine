@@ -188,18 +188,21 @@ meanQuantiles <- function(offset, suwNames, variables, loads)
   emptyStats <- initStats(suwNames)
   
   result <- lapply(loads, function(load) {
-    
-    subresult <- emptyStats
-    
-    for (j in seq_along(suwNames)) {
-
-      subresult[1:3, 1 + j] <- getStats(x = load[, offset + j])
-    }
-    
-    subresult
+    fillStats(stats = emptyStats, load, offset, suwNames)
   })
   
   structure(result, names = variables) 
+}
+
+# fillStats --------------------------------------------------------------------
+fillStats <- function(stats, load, offset, suwNames)
+{
+  for (j in seq_along(suwNames)) {
+    
+    stats[1:3, 1 + j] <- getStats(x = load[, offset + j])
+  }
+
+  stats  
 }
 
 # initStats --------------------------------------------------------------------
