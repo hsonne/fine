@@ -204,9 +204,7 @@ initStats <- function(suwNames, stats = c("mean", "Quan 5", "Quan 95"),
   
   result[, 1] <- stats
   
-  colnames(result) <- columns
-  
-  result
+  structure(result, names = columns)
 }
 
 # fillStats --------------------------------------------------------------------
