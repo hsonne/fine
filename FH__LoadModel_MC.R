@@ -68,10 +68,10 @@ annual_load_rain <- function # calculates the load for each substance
   x_conc_BKE <- readTableOrStop(data.dir, name, types[name])
 
   name <- "Vol_rain"
-  vol_rain <- readTableOrStop(data.dir, name, types[name], dec = ",")
+  vol_rain <- readTableOrStop(data.dir, name, types[name])
   
   name <- "substance_info"
-  removal_rates <- readTableOrStop(data.dir, name, types[name], dec = ",")
+  removal_rates <- readTableOrStop(data.dir, name, types[name])
   
   ### loads of rainwater based substances via separate sewer system and CSO
   
@@ -85,31 +85,20 @@ annual_load_rain <- function # calculates the load for each substance
   MC_conc_rain_sep <- prop.wrong * MC_conc_rain_wrongcon + 
     (1 - prop.wrong) * MC_conc_rain
   
-  #hist(log10(MC_conc_rain_wrongcon$`Escherichia coli`), breaks = 100)
-  
   # Step 2: Monte Carlo simulations to get rain volumes
   
-  # HS: Why is column "sd" not already numeric? Because vol_rain is loaded with
-  # dec = ","? But then as.numeric() will produce NA!
-  vol_rain <- toNumeric(vol_rain, "sd")
-  
-  # HS: Why is set.names = FALSE here? Because vol_rain does not have a column
-  # "VariableName"?
-  MC_vol_rain_1 <- initMonteCarlo(
+  MC_vol_rain <- initMonteCarlo(
     x = vol_rain, runs = runs, log = FALSE, set.names = FALSE, seed = 3
   )
   
-  # HS: What happens here? What is contained in the first two columns? Better:
-  # select columns by name, then it is obvious what is contained.
-  # Why do you overwrite "MC_vol_rain_1" holding the result of initMonteCarlo()
-  # here?
+  # get SUW-names and paths
   MC_vol_rain_1 <- vol_rain[, 1:2]
-  MC_vol_rain <- cbind(MC_vol_rain_1, t(MC_vol_rain_1))
+  MC_vol_rain <- cbind(MC_vol_rain_1, t(MC_vol_rain))
 
   # Provide units
   units <- selectColumns(x_conc_NEU, "UnitsAbbreviation")
   
-  # Step 3: Calculation of loads in list, sep + CSO
+  # Step 3: Calculation of loads in rainwater (in list), sep + CSO
   
   load_rain_sep <- getLoads(
     concentration = MC_conc_rain_sep,
@@ -125,7 +114,7 @@ annual_load_rain <- function # calculates the load for each substance
     parameter = "ROWvol, CSO [m3/a]"
   )
   
-  ### loads of rainwater based substances via WWTP
+  ### Calculation of loads in rainwater (in list), WWTP
   
   # Step 1: MC to get concentration in rainwater and rain volume calculation is 
   #   already done (MC_conc_rain, MC_vol_rain)
@@ -133,26 +122,13 @@ annual_load_rain <- function # calculates the load for each substance
   # Step 2: Monte Carlo simulations to get removal rates
   
   # missing removal rates (mean and sd) are set = 0
-  
-  # HS: Why are these columns not already numeric? Because removal_rates is 
-  # loaded with dec = ","? But then as.numeric() will produce NA!
-  removal_rates <- toNumeric(removal_rates, c("Retention_.", "Retention_sd"))
-  
-  # HS: What is contained in columns 2 and 3? This is only logical if the
-  # second column is "Retention_." (bad name, by the way) and the third
-  # column is "Retention_sd". You may use kwb.utils::defaultIfNA():
-  #removal_rates$Retention_. <- defaultIfNA(removal_rates$Retention_., 0)
-  #removal_rates$Retention_sd <- defaultIfNA(removal_rates$Retention_sd, 0)
-  removal_rates[is.na(removal_rates$Retention_.), 2] <- 0
-  removal_rates[is.na(removal_rates$Retention_sd), 3] <- 0
-  
+  removal_rates$Retention <- defaultIfNA(removal_rates$Retention, 0)
+  removal_rates$Retention_sd <- defaultIfNA(removal_rates$Retention_sd, 0)
+ 
   # get removal rates for substances in x_conc_NEU only (and in same order)
   removal_rates_red <- x_conc_NEU[, 1:2]
-  
-  # HS: I think you could use merge here. No need for is.numeric(), already
-  # converted above.
   indices <- match(removal_rates_red$VariableName, removal_rates$VariableName)
-  removal_rates_red$mean <- removal_rates$Retention_.[indices]
+  removal_rates_red$mean <- removal_rates$Retention[indices]
   removal_rates_red$sd <- removal_rates$Retention_sd[indices]
   
   MC_removal_rates <- initMonteCarlo(
@@ -386,7 +362,7 @@ annual_load_sewage <- function # calculates the load for each substance
   vol_sewage <- readTableOrStop(data.dir, name, types[name])
   
   name <- "substance_info"
-  sub_sew_info <- readTableOrStop(data.dir, name, types[name], dec = ",")
+  sub_sew_info <- readTableOrStop(data.dir, name, types[name])
   
   ### loads of sewage based substances via CSO and WWTP
   
@@ -396,26 +372,20 @@ annual_load_sewage <- function # calculates the load for each substance
     x = vol_sewage, runs = runs, log = FALSE, set.names = FALSE, seed = 2
   )
   
-  MC_vol_sew <- vol_sewage[, 1:2]
-  MC_vol_sewage <- cbind(MC_vol_sew, t(MC_vol_sew))
+  MC_vol_sew_1 <- vol_sewage[, 1:2]
+  MC_vol_sewage <- cbind(MC_vol_sew_1, t(MC_vol_sew))
   
   # Step 2: Monte Carlo simulations to get removal rates, concentrations of 
   # influent/effluent WWTP
   
-  # read substance information
-  columns <- c("Retention_.", "Retention_sd", "CinWWTP_calculated", 
-               "CinWWTP_sd", "CoutWWTP", "CoutWWTP_sd")
-  
-  sub_sew_info <- toNumeric(sub_sew_info, columns)
-  
   # set retention to zero, where information is lacking
-  sub_sew_info$Retention_.[is.na(sub_sew_info$Retention_.)] <- 0
+  sub_sew_info$Retention[is.na(sub_sew_info$Retention)] <- 0
   sub_sew_info$Retention_sd[is.na(sub_sew_info$Retention_sd)] <- 0
   
   # MC to get retention
   MC_retention <- initMonteCarlo(
     x = sub_sew_info, runs = runs, log = FALSE, set.names = TRUE,
-    column.mean = "Retention_.", column.sd = "Retention_sd", seed = 6
+    column.mean = "Retention", column.sd = "Retention_sd", seed = 6
   )
   
   # MC to get concentrations in wastewater
