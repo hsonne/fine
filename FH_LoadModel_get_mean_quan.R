@@ -194,17 +194,6 @@ meanQuantiles <- function(offset, suwNames, variables, loads)
   structure(result, names = variables) 
 }
 
-# fillStats --------------------------------------------------------------------
-fillStats <- function(stats, load, offset)
-{
-  for (j in seq_along(ncol(stats) - 1)) {
-    
-    stats[1:3, 1 + j] <- getStats(x = load[, offset + j])
-  }
-
-  stats  
-}
-
 # initStats --------------------------------------------------------------------
 initStats <- function(suwNames, stats = c("mean", "Quan 5", "Quan 95"), 
                       column.stats = "Value")
@@ -218,6 +207,17 @@ initStats <- function(suwNames, stats = c("mean", "Quan 5", "Quan 95"),
   colnames(result) <- columns
   
   result
+}
+
+# fillStats --------------------------------------------------------------------
+fillStats <- function(stats, load, offset)
+{
+  for (j in seq_along(ncol(stats) - 1)) {
+    
+    stats[1:3, 1 + j] <- getStats(x = load[, offset + j])
+  }
+  
+  stats  
 }
 
 # getStats ---------------------------------------------------------------------
