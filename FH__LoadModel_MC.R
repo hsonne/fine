@@ -172,7 +172,6 @@ annual_load_rain <- function # calculates the load for each substance
   load_rain_sum_paths <- sumPaths(
     suwNames = unique(vol_rain$SUW),
     variables = colnames(MC_conc_rain),
-    runs = runs,
     inputs = list(load_rain_cso, load_rain_sep, load_rain_wwtp)
   )
 
@@ -338,9 +337,15 @@ changeunit <- function(x, factors = CONVERSION_FACTORS)
 }
 
 # sumPaths ---------------------------------------------------------------------
-sumPaths <- function(suwNames, variables, runs, inputs)
+sumPaths <- function(suwNames, variables, inputs)
 {
-  out.init <- data.frame(matrix(ncol = length(suwNames), nrow = runs))
+  # All inputs must have the same number of rows
+  stopifnot(allAreEqual(sapply(inputs, length)))
+  
+  # Get the number of rows in each output data frame from the first input
+  n.rows <- nrow(inputs[[1]])
+  
+  out.init <- data.frame(matrix(ncol = length(suwNames), nrow = n.rows))
   colnames(out.init) <- suwNames
   
   result <- lapply(seq_along(variables), function(i) {
@@ -451,7 +456,6 @@ annual_load_sewage <- function # calculates the load for each substance
   load_sew_sum_paths <- sumPaths(
     suwNames = unique(vol_sewage$SUW),
     variables = colnames(MC_conc_sew),
-    runs = runs,
     inputs = list(load_sew_cso, load_sew_wwtp)
   )
   
