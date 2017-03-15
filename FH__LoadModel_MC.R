@@ -352,7 +352,7 @@ sumPaths <- function(suwNames, variables, inputs)
     
     out <- out.init
     
-    for (j in seq_along(suwNames)) {
+    for (j in seq_len(ncol(out))) {
       
       # Get the appropriate column vectors from the input lists
       vectors <- lapply(inputs, function(input) input[[i]][, 1 + j])
