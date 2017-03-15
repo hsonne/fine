@@ -340,7 +340,7 @@ changeunit <- function(x, factors = CONVERSION_FACTORS)
 sumPaths <- function(suwNames, variables, inputs)
 {
   # All inputs must have the same number of rows
-  stopifnot(allAreEqual(sapply(inputs, length)))
+  stopifnot(allAreEqual(sapply(inputs, nrow)))
   
   # Get the number of rows in each output data frame from the first input
   n.rows <- nrow(inputs[[1]])
