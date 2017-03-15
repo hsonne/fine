@@ -210,7 +210,7 @@ initStats <- function(suwNames, stats = c("mean", "Quan 5", "Quan 95"),
 # fillStats --------------------------------------------------------------------
 fillStats <- function(stats, load, offset)
 {
-  for (j in seq_along(ncol(stats) - 1)) {
+  for (j in seq_len(ncol(stats) - 1)) {
     
     stats[1:3, 1 + j] <- getStats(x = load[, offset + j])
   }
