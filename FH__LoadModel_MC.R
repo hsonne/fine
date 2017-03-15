@@ -340,10 +340,10 @@ changeunit <- function(x, factors = CONVERSION_FACTORS)
 sumPaths <- function(suwNames, variables, inputs)
 {
   # All inputs must have the same number of rows
-  stopifnot(allAreEqual(sapply(inputs, nrow)))
+  stopifnot(allAreEqual(sapply(inputs, function(input) nrow(input[[1]]))))
   
   # Get the number of rows in each output data frame from the first input
-  n.rows <- nrow(inputs[[1]])
+  n.rows <- nrow(inputs[[1]][[1]])
   
   out.init <- data.frame(matrix(ncol = length(suwNames), nrow = n.rows))
   colnames(out.init) <- suwNames
