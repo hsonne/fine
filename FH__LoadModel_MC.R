@@ -218,7 +218,7 @@ initMonteCarlo <- function
   names <- if (set.names) {
     as.character(x$VariableName) 
   } else {
-    paste0("X", indices) # Default names: X1, X2, X3, ...
+    paste0("X", rows) # Default names: X1, X2, X3, ...
   }
   
   # Convert the list into a data frame and set the column names of that
@@ -258,13 +258,13 @@ getLoads <- function
   
   # calculate loads in list
   load_x <- lapply(seq_len(ncol(concentration)), function(i) {
-    
+#i = 7
     # Initialise the output data frame with a unit column
     out <- data.frame(unit = rep(units[i], times = nrow(concentration)))
 
     # Get the loads for each SUW
     for (suwName in suwNames) {
-
+#suwName = suwNames[3]
       # From the volume data frame, already filtered for the given parameter,
       # select the row representing the current SUW name. 
       volume_suw <- volume[volume$SUW == suwName, ]
@@ -274,7 +274,7 @@ getLoads <- function
 
       # Fill the empty column with the actual loads, calculated for each run
       for (run in seq_len(runs)) {
-        
+#run = 10
         # Skip the first 2 columns, SUW and Parameter, in volume_suw: 2 + run
         load <- concentration[run, i] * volume_suw[, 2 + run]
         
@@ -295,9 +295,9 @@ getLoads <- function
 changeunit <- function(x, factors = CONVERSION_FACTORS)
 {
   #x <- load_x
-  
-  unit <- unique(selectColumns(x, "unit"))
-  
+
+  unit <- as.character(unique(selectColumns(x, "unit")))
+
   if (is.na(factors[unit])) {
     
     stop("No conversion factor defined for unit: '", unit, "'! Conversion ", 
@@ -317,7 +317,7 @@ sumPaths <- function(suwNames, variables, inputs)
 {
   # All inputs must have the same number of rows
   stopifnot(allAreEqual(sapply(inputs, function(input) nrow(input[[1]]))))
-  
+
   # Get the number of rows in each output data frame from the first input
   n.rows <- nrow(inputs[[1]][[1]])
   
