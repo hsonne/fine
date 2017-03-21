@@ -20,7 +20,7 @@ name <- "NEU_meanln_sdln"
 x_conc_NEU <- readTableOrStop(data.dir, name, types[name])
 
 name <- "Vol_rain"
-vol_rain <- readTableOrStop(data.dir, name, types[name], dec = ",")
+vol_rain <- readTableOrStop(data.dir, name, types[name])
 
 name <- "Vol_sewage"
 vol_sewage <- readTableOrStop(data.dir, name, types[name])
@@ -41,13 +41,13 @@ if (FALSE)
   load_rain_cso  <- x_annual_loads_rain$load_rain_cso
   load_rain_sep  <- x_annual_loads_rain$load_rain_sep
   load_rain_wwtp <- x_annual_loads_rain$load_rain_wwtp
-  load_rain_sum  <- x_annual_loads_rain$load_rain_sums
+  load_rain_sum  <- x_annual_loads_rain$load_rain_sum
   MC_vol_rain    <- x_annual_loads_rain$MC_vol_rain
   
   # Provide loads from list "x_annual_loads_sew"
   load_sew_cso  <- x_annual_loads_sew$load_sew_cso
   load_sew_wwtp <- x_annual_loads_sew$load_sew_wwtp
-  load_sew_sum  <- x_annual_loads_sew$load_sew_sums
+  load_sew_sum  <- x_annual_loads_sew$load_sew_sum
   MC_vol_sewage <- x_annual_loads_sew$MC_vol_sewage
   
   # Define function arguments for meanQuantiles
@@ -67,7 +67,7 @@ if (FALSE)
   load_rain_cso_mean_quan  <- do.call(meanQuantiles, args1$rain_cso)
   load_rain_sep_mean_quan  <- do.call(meanQuantiles, args1$rain_sep)
   load_rain_wwtp_mean_quan <- do.call(meanQuantiles, args1$rain_wwtp)
-
+  
   ## get mean and quantiles for loads in sewage and all pathways
   load_sew_cso_mean_quan  <- do.call(meanQuantiles, args1$sew_cso)
   load_sew_wwtp_mean_quan <- do.call(meanQuantiles, args1$sew_wwtp)
@@ -84,8 +84,8 @@ if (FALSE)
     tot  = list(variables, SUW_Names_sew, load_rain_sum, load_sew_sum)
   )
   
-  ## combine loads rainwater and sewage, load_rain_wwtp + load_sew_wwtp,
-  ## rainwater + sewage
+  ## combine loads rainwater and sewage (load_rain_wwtp + load_sew_wwtp,
+  ## load_rain_cso + load_sew_cso), total load (load_rain_sum + load_sew_sum)
   load_cso_comb  <- do.call(combineLoads, args2$cso)
   load_wwtp_comb <- do.call(combineLoads, args2$wwtp)
   load_TOT       <- do.call(combineLoads, args2$tot)
@@ -103,10 +103,10 @@ if (FALSE)
   load_cso_mean_quan  <- do.call(meanQuantiles, args3$cso)
   load_wwtp_mean_quan <- do.call(meanQuantiles, args3$wwtp)
   
-  # get mean and quantiles for total load
+  # mean and quantiles for total load
   load_TOT_mean_quan <- do.call(meanQuantiles, args3$tot)
   
-  ### get mean and quantiles for volumes of rainwater and sewage
+  ### mean and quantiles for volumes of rainwater and sewage
   ## rainwater volumes
   vol_rain_mean_quan <- getMeanAndQuantiles(
     volume = vol_rain, 
@@ -114,10 +114,10 @@ if (FALSE)
     suwNames = SUW_Names_rain,
     multiple = 3
   )
-
+  
   # mean and quantiles for total rain volumes by SUW
   vol_rain_TOT <- toTotal(x = MC_vol_rain, suwNames = SUW_Names_rain)
-
+  
   ## sewage volumes
   vol_sewage_mean_quan <- getMeanAndQuantiles(
     volume = vol_sewage[, 1:2], 
@@ -130,6 +130,11 @@ if (FALSE)
   # one data frame for mean and quantiles of sewage volumes
   vol_sew_TOT <- toTotal(x = MC_vol_sewage, suwNames = SUW_Names_sew)
   
+  ## sum volumes of rainwater + sewage, get mean and quantiles
+  
+  sum_vol_TOT <- toTotal(x = rbind(sum_vol_rain, sum_vol_sew), 
+                         suwNames = SUW_Names_rain, x.long = FALSE)
+  
   ## get OgRe-dataframe-structure for plotting
   
   ## for loads in rainwater
@@ -137,6 +142,7 @@ if (FALSE)
   
   loads_rain_by_path_mean_quan <- summarise_loads(
     suwNames = SUW_Names_rain,
+    variables = variables,
     inputs = list(
       SEP = load_rain_sep_mean_quan, CSO = load_rain_cso_mean_quan,
       WWTP = load_rain_wwtp_mean_quan, TOT = load_rain_sum_mean_quan
@@ -146,7 +152,7 @@ if (FALSE)
       "WWTP_mean", "WWTP_5", "WWTP_95", "TOT_mean", "TOT_5", "TOT_95"
     )
   )
-
+  
   ## for loads in sewage
   # by path
   
@@ -170,7 +176,7 @@ if (FALSE)
     inputs = list(CSO = load_cso_mean_quan, WWTP = load_wwtp_mean_quan),
     columns = c("CSO_5", "CSO_95", "WWTP_5", "WWTP_95")
   )
-
+  
   ## for total loads
   loads_TOT_mean_quan <- summarise_loads(
     suwNames = SUW_Names_rain, 
@@ -192,7 +198,7 @@ meanQuantiles <- function(offset, suwNames, variables, loads)
     subresult <- emptyStats
     
     for (j in seq_along(suwNames)) {
-
+      
       subresult[1:3, 1 + j] <- getStats(x = load[, offset + j])
     }
     
@@ -252,7 +258,7 @@ getMeanAndQuantiles <- function(volume, monteCarlo, suwNames, multiple)
   volume[, columns] <- 0
   
   for (i in seq_len(multiple * length(suwNames))) {
-
+    
     volume[i, columns] <- getStats(x = monteCarlo[, i])
   }
   
@@ -260,20 +266,25 @@ getMeanAndQuantiles <- function(volume, monteCarlo, suwNames, multiple)
 }
 
 # toTotal ----------------------------------------------------------------------
-toTotal <- function(x, suwNames)
+toTotal <- function(x, suwNames, x.long = TRUE)
 {
-  x.long <- hsMatrixToListForm(
-    x, 
-    keyFields = c("SUW", "Parameter"), 
-    colNamePar = "run", 
-    colNameVal = "volume"
-  )
   
-  sum_SUW <- aggregate(volume ~ SUW + run, data = x.long, FUN = sum)
+  if (x.long == TRUE){
+    
+    x.long <- hsMatrixToListForm(
+      x, 
+      keyFields = c("SUW", "Parameter"), 
+      colNamePar = "run", 
+      colNameVal = "volume"
+    )}
   
-  means <- aggregateBySUW(sum_SUW, mean)
-  quantiles5 <- aggregateBySUW(sum_SUW, quantile, probs = 0.05)
-  quantiles95 <- aggregateBySUW(sum_SUW, quantile, probs = 0.95)
+  else {x.long <- x}
+  
+  sum_vol <- aggregate(volume ~ SUW + run, data = x.long, FUN = sum)
+  
+  means <- aggregateBySUW(sum_vol, mean)
+  quantiles5 <- aggregateBySUW(sum_vol, quantile, probs = 0.05)
+  quantiles95 <- aggregateBySUW(sum_vol, quantile, probs = 0.95)
   
   # Initialise statistics data frame
   result <- initStats(suwNames, column.stats = "Values")
