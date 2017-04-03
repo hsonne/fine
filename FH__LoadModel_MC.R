@@ -302,7 +302,7 @@ changeunit <- function(x, factors = CONVERSION_FACTORS)
 {
   #x <- load_x
   
-  unit <- unique(selectColumns(x, "unit"))
+  unit <- as.character(unique(selectColumns(x, "unit")))
   
   if (is.na(factors[unit])) {
     
